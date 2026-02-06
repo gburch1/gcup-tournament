@@ -4,128 +4,940 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The G Cup Tournament</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body>
-    <div id="root">
-        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #111827 100%);">
-            <div style="color: #fbbf24; font-size: 1.5rem; font-weight: bold;">Loading The G Cup...</div>
-        </div>
-    </div>
-
-    <!-- Firebase - Load First -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <!-- React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <script>
-        // Check if Firebase loaded
-        if (typeof firebase === 'undefined') {
-            document.getElementById('root').innerHTML = '<div style="padding: 20px; color: red;">Error: Firebase failed to load. Please refresh the page.</div>';
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-    </script>
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Wait for Firebase to be ready
-        if (typeof firebase === 'undefined') {
-            throw new Error('Firebase not loaded');
-        }
+        // Lucide React icons as inline SVG components
+        const Trophy = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+        );
 
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB5UW3GO_y-hVWXLBG6SZWwhf041nvUkEQ",
-            authDomain: "thegcup-gthang.firebaseapp.com",
-            databaseURL: "https://thegcup-gthang-default-rtdb.firebaseio.com",
-            projectId: "thegcup-gthang",
-            storageBucket: "thegcup-gthang.firebasestorage.app",
-            messagingSenderId: "36937413793",
-            appId: "1:36937413793:web:7764b576b4b0ac7da5ece0"
-        };
+        const Users = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        );
 
-        // Initialize Firebase
-        let database;
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            database = firebase.database();
-        } catch (error) {
-            console.error("Firebase init error:", error);
-        }
+        const Award = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="6"></circle>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+            </svg>
+        );
 
-        const TournamentApp = () => {
-            const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(null);
-            
+        const Lock = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        );
+
+        const Unlock = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+            </svg>
+        );
+
+        const TennisTournamentApp = () => {
+            const [isDirector, setIsDirector] = useState(false);
+            const [directorPassword, setDirectorPassword] = useState('');
+            const [passwordInput, setPasswordInput] = useState('');
+            const [activeTab, setActiveTab] = useState('championship');
+            const [showPasswordModal, setShowPasswordModal] = useState(false);
+            const [showTeamManagement, setShowTeamManagement] = useState(false);
+            const [editingDivision, setEditingDivision] = useState('championship');
+            const [showExportModal, setShowExportModal] = useState(false);
+            const [showImportModal, setShowImportModal] = useState(false);
+            const [exportCode, setExportCode] = useState('');
+            const [importCode, setImportCode] = useState('');
+
+            // Initialize tournament data
+            const [tournamentData, setTournamentData] = useState({
+                championship: {
+                    teams: [
+                        { id: 1, name: 'Team Alpha', points: 0, players: ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6'] },
+                        { id: 2, name: 'Team Beta', points: 0, players: ['Player 7', 'Player 8', 'Player 9', 'Player 10', 'Player 11', 'Player 12'] },
+                        { id: 3, name: 'Team Gamma', points: 0, players: ['Player 13', 'Player 14', 'Player 15', 'Player 16', 'Player 17', 'Player 18'] },
+                        { id: 4, name: 'Team Delta', points: 0, players: ['Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'] }
+                    ],
+                    rounds: [
+                        { id: 1, name: 'Round 1', pointValue: 1, matches: [] },
+                        { id: 2, name: 'Round 2', pointValue: 1, matches: [] },
+                        { id: 3, name: 'Round 3', pointValue: 2, matches: [] },
+                        { id: 4, name: 'Round 4', pointValue: 2, matches: [] }
+                    ],
+                    tiebreaker: null
+                },
+                classic: {
+                    teams: [
+                        { id: 1, name: 'Team Classic A', points: 0, players: ['Player A1', 'Player A2', 'Player A3', 'Player A4', 'Player A5', 'Player A6'] },
+                        { id: 2, name: 'Team Classic B', points: 0, players: ['Player B1', 'Player B2', 'Player B3', 'Player B4', 'Player B5', 'Player B6'] }
+                    ],
+                    rounds: [
+                        { id: 1, name: 'Round 1', pointValue: 1, matches: [] },
+                        { id: 2, name: 'Round 2', pointValue: 1, matches: [] },
+                        { id: 3, name: 'Round 3', pointValue: 2, matches: [] },
+                        { id: 4, name: 'Round 4', pointValue: 2, matches: [] }
+                    ],
+                    tiebreaker: null
+                }
+            });
+
+            // Load data from localStorage
             useEffect(() => {
-                // Simple test
-                setTimeout(() => {
-                    if (database) {
-                        setLoading(false);
-                    } else {
-                        setError("Database connection failed");
-                        setLoading(false);
-                    }
-                }, 1000);
+                const saved = localStorage.getItem('tennisTournamentData');
+                if (saved) {
+                    setTournamentData(JSON.parse(saved));
+                }
+                const savedPassword = localStorage.getItem('directorPassword');
+                if (savedPassword) {
+                    setDirectorPassword(savedPassword);
+                } else {
+                    setDirectorPassword('director123');
+                    localStorage.setItem('directorPassword', 'director123');
+                }
             }, []);
 
-            if (loading) {
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
-                        <div className="text-yellow-400 text-2xl font-bold">Connecting to tournament...</div>
-                    </div>
-                );
-            }
+            // Save data to localStorage
+            useEffect(() => {
+                localStorage.setItem('tennisTournamentData', JSON.stringify(tournamentData));
+            }, [tournamentData]);
 
-            if (error) {
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center p-4">
-                        <div className="bg-red-900 text-white p-8 rounded-lg max-w-md text-center">
-                            <h2 className="text-2xl font-bold mb-4">Connection Error</h2>
-                            <p className="mb-4">{error}</p>
-                            <button 
-                                onClick={() => window.location.reload()} 
-                                className="px-6 py-3 bg-white text-red-900 rounded-lg font-bold hover:bg-gray-100"
-                            >
-                                Retry
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
+            const handleLogin = () => {
+                if (passwordInput === directorPassword) {
+                    setIsDirector(true);
+                    setShowPasswordModal(false);
+                    setPasswordInput('');
+                } else {
+                    alert('Incorrect password');
+                }
+            };
+
+            const addMatch = (division, roundId, team1Id, team2Id) => {
+                const newMatch = {
+                    id: Date.now(),
+                    team1: team1Id,
+                    team2: team2Id,
+                    team1Player1: '',
+                    team1Player2: '',
+                    team2Player1: '',
+                    team2Player2: '',
+                    team1Games: 0,
+                    team2Games: 0,
+                    tiebreakScore: '',
+                    completed: false
+                };
+
+                setTournamentData(prev => ({
+                    ...prev,
+                    [division]: {
+                        ...prev[division],
+                        rounds: prev[division].rounds.map(round =>
+                            round.id === roundId
+                                ? { ...round, matches: [...round.matches, newMatch] }
+                                : round
+                        )
+                    }
+                }));
+            };
+
+            const updateMatch = (division, roundId, matchId, updates) => {
+                setTournamentData(prev => ({
+                    ...prev,
+                    [division]: {
+                        ...prev[division],
+                        rounds: prev[division].rounds.map(round =>
+                            round.id === roundId
+                                ? {
+                                    ...round,
+                                    matches: round.matches.map(match =>
+                                        match.id === matchId ? { ...match, ...updates } : match
+                                    )
+                                }
+                                : round
+                        )
+                    }
+                }));
+            };
+
+            const completeMatch = (division, roundId, matchId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                const match = round.matches.find(m => m.id === matchId);
+                
+                if (!match.team1Player1 || !match.team1Player2 || !match.team2Player1 || !match.team2Player2) {
+                    alert('Please select all players for both teams');
+                    return;
+                }
+
+                // Determine winner - if games are tied, check tiebreak score
+                let winner;
+                if (match.team1Games === match.team2Games && match.team1Games === 3) {
+                    // It's 3-3, need to check tiebreak
+                    if (!match.tiebreakScore || !match.tiebreakScore.includes('-')) {
+                        alert('Please enter the tiebreak score (e.g., 7-5)');
+                        return;
+                    }
+                    // Parse tiebreak score like "7-5" or "5-7"
+                    const tiebreakParts = match.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                    if (tiebreakParts.length === 2 && !isNaN(tiebreakParts[0]) && !isNaN(tiebreakParts[1])) {
+                        winner = tiebreakParts[0] > tiebreakParts[1] ? match.team1 : match.team2;
+                    } else {
+                        alert('Invalid tiebreak score format. Please use format like "7-5"');
+                        return;
+                    }
+                } else {
+                    // Regular winner based on games
+                    winner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                }
+                
+                const pointValue = round.pointValue;
+
+                setTournamentData(prev => ({
+                    ...prev,
+                    [division]: {
+                        ...prev[division],
+                        teams: prev[division].teams.map(team =>
+                            team.id === winner
+                                ? { ...team, points: team.points + pointValue }
+                                : team
+                        ),
+                        rounds: prev[division].rounds.map(r =>
+                            r.id === roundId
+                                ? {
+                                    ...r,
+                                    matches: r.matches.map(m =>
+                                        m.id === matchId ? { ...m, completed: true } : m
+                                    )
+                                }
+                                : r
+                        )
+                    }
+                }));
+            };
+
+            const deleteMatch = (division, roundId, matchId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                const match = round.matches.find(m => m.id === matchId);
+                
+                if (match.completed) {
+                    const winner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                    const pointValue = round.pointValue;
+                    
+                    setTournamentData(prev => ({
+                        ...prev,
+                        [division]: {
+                            ...prev[division],
+                            teams: prev[division].teams.map(team =>
+                                team.id === winner
+                                    ? { ...team, points: team.points - pointValue }
+                                    : team
+                            ),
+                            rounds: prev[division].rounds.map(r =>
+                                r.id === roundId
+                                    ? {
+                                        ...r,
+                                        matches: r.matches.filter(m => m.id !== matchId)
+                                    }
+                                    : r
+                            )
+                        }
+                    }));
+                } else {
+                    setTournamentData(prev => ({
+                        ...prev,
+                        [division]: {
+                            ...prev[division],
+                            rounds: prev[division].rounds.map(r =>
+                                r.id === roundId
+                                    ? {
+                                        ...r,
+                                        matches: r.matches.filter(m => m.id !== matchId)
+                                    }
+                                    : r
+                            )
+                        }
+                    }));
+                }
+            };
+
+            const getTeamName = (division, teamId) => {
+                const team = tournamentData[division].teams.find(t => t.id === teamId);
+                return team ? team.name : '';
+            };
+
+            const getTeamPlayers = (division, teamId) => {
+                const team = tournamentData[division].teams.find(t => t.id === teamId);
+                return team ? team.players : [];
+            };
+
+            const handleExport = () => {
+                const dataString = JSON.stringify(tournamentData);
+                const encoded = btoa(dataString);
+                setExportCode(encoded);
+                setShowExportModal(true);
+            };
+
+            const handleImport = () => {
+                try {
+                    const decoded = atob(importCode);
+                    const imported = JSON.parse(decoded);
+                    setTournamentData(imported);
+                    localStorage.setItem('tennisTournamentData', JSON.stringify(imported));
+                    setShowImportModal(false);
+                    setImportCode('');
+                    alert('✅ Data imported successfully! Tournament updated.');
+                } catch (error) {
+                    alert('❌ Invalid import code. Please check and try again.');
+                }
+            };
+
+            const copyToClipboard = () => {
+                navigator.clipboard.writeText(exportCode);
+                alert('✅ Code copied to clipboard! Share with players.');
+            };
+
+            const updateTeamName = (division, teamId, newName) => {
+                setTournamentData(prev => ({
+                    ...prev,
+                    [division]: {
+                        ...prev[division],
+                        teams: prev[division].teams.map(team =>
+                            team.id === teamId ? { ...team, name: newName } : team
+                        )
+                    }
+                }));
+            };
+
+            const updatePlayerName = (division, teamId, playerIndex, newName) => {
+                setTournamentData(prev => ({
+                    ...prev,
+                    [division]: {
+                        ...prev[division],
+                        teams: prev[division].teams.map(team =>
+                            team.id === teamId
+                                ? {
+                                    ...team,
+                                    players: team.players.map((player, idx) =>
+                                        idx === playerIndex ? newName : player
+                                    )
+                                }
+                                : team
+                        )
+                    }
+                }));
+            };
+
+            const currentDivision = tournamentData[activeTab];
+            const sortedTeams = [...currentDivision.teams].sort((a, b) => b.points - a.points);
 
             return (
                 <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 p-4">
                     <div className="max-w-7xl mx-auto">
-                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
-                            <h1 className="text-3xl font-bold text-yellow-400 text-center">
-                                🎾 The G Cup Tournament 🎾
-                            </h1>
-                            <p className="text-yellow-200 text-center italic mt-2">
-                                Firebase Connected Successfully!
-                            </p>
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500 relative overflow-hidden">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Trophy className="w-10 h-10 text-yellow-400" />
+                                    <div>
+                                        <h1 className="text-3xl font-bold text-yellow-400" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.5)'}}>
+                                            The G Cup Tournament
+                                        </h1>
+                                        <p className="text-yellow-200 italic">It's a G-Thang • Championship Tennis Competition</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 flex-wrap">
+                                    {isDirector && (
+                                        <>
+                                            <button
+                                                onClick={() => setShowTeamManagement(true)}
+                                                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500 shadow-lg"
+                                            >
+                                                <Users className="w-5 h-5" />
+                                                Manage Teams
+                                            </button>
+                                            <button
+                                                onClick={handleExport}
+                                                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-400 hover:to-green-500 shadow-lg"
+                                            >
+                                                📤 Export
+                                            </button>
+                                        </>
+                                    )}
+                                    <button
+                                        onClick={() => setShowImportModal(true)}
+                                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500 shadow-lg"
+                                    >
+                                        📥 Import
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (isDirector) {
+                                                setIsDirector(false);
+                                            } else {
+                                                setShowPasswordModal(true);
+                                            }
+                                        }}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow-lg ${
+                                            isDirector
+                                                ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-500 hover:to-red-600'
+                                                : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500'
+                                        }`}
+                                    >
+                                        {isDirector ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                                        {isDirector ? 'Logout' : 'Director Login'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <div className="bg-white rounded-lg p-8 text-center">
-                            <p className="text-2xl font-bold text-green-600 mb-4">✅ Connection Test Passed!</p>
-                            <p className="text-gray-700">Firebase is working. Ready to add full tournament features.</p>
+
+                        {/* Division Tabs */}
+                        <div className="flex gap-4 mb-6">
+                            <button
+                                onClick={() => setActiveTab('championship')}
+                                className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all shadow-lg ${
+                                    activeTab === 'championship'
+                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 border-2 border-yellow-400'
+                                        : 'bg-gray-800 text-yellow-200 hover:bg-gray-700 border-2 border-gray-600'
+                                }`}
+                            >
+                                <Award className="w-5 h-5 inline mr-2" />
+                                Championship Cup
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('classic')}
+                                className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-all shadow-lg ${
+                                    activeTab === 'classic'
+                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 border-2 border-yellow-400'
+                                        : 'bg-gray-800 text-yellow-200 hover:bg-gray-700 border-2 border-gray-600'
+                                }`}
+                            >
+                                <Users className="w-5 h-5 inline mr-2" />
+                                Classic Cup
+                            </button>
                         </div>
+
+                        {/* Standings */}
+                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
+                            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Standings</h2>
+                            <div className="space-y-3">
+                                {sortedTeams.map((team, index) => {
+                                    const teamMatches = currentDivision.rounds.flatMap(round => 
+                                        round.matches
+                                            .filter(match => match.completed && (match.team1 === team.id || match.team2 === team.id))
+                                            .map(match => ({
+                                                ...match,
+                                                roundName: round.name,
+                                                isTeam1: match.team1 === team.id,
+                                                opponent: match.team1 === team.id ? 
+                                                    getTeamName(activeTab, match.team2) : 
+                                                    getTeamName(activeTab, match.team1),
+                                                teamScore: match.team1 === team.id ? match.team1Games : match.team2Games,
+                                                opponentScore: match.team1 === team.id ? match.team2Games : match.team1Games,
+                                                won: match.team1 === team.id ? 
+                                                    match.team1Games > match.team2Games : 
+                                                    match.team2Games > match.team1Games,
+                                                teamPlayers: match.team1 === team.id ?
+                                                    `${match.team1Player1} & ${match.team1Player2}` :
+                                                    `${match.team2Player1} & ${match.team2Player2}`,
+                                                opponentPlayers: match.team1 === team.id ?
+                                                    `${match.team2Player1} & ${match.team2Player2}` :
+                                                    `${match.team1Player1} & ${match.team1Player2}`
+                                            }))
+                                    );
+
+                                    return (
+                                        <div
+                                            key={team.id}
+                                            className={`p-4 rounded-lg ${
+                                                index === 0 ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-2 border-yellow-400 shadow-lg' : 'bg-gray-800 border-2 border-gray-600'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-4">
+                                                    <span className={`text-2xl font-bold w-8 ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>#{index + 1}</span>
+                                                    <div>
+                                                        <h3 className={`text-xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>{team.name}</h3>
+                                                        <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>{team.players.join(', ')}</p>
+                                                    </div>
+                                                </div>
+                                                <div className={`text-3xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>{team.points} pts</div>
+                                            </div>
+                                            
+                                            {teamMatches.length > 0 && (
+                                                <div className={`mt-3 pt-3 ${index === 0 ? 'border-t border-gray-700' : 'border-t border-gray-600'}`}>
+                                                    <p className={`text-sm font-semibold mb-2 ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>Match Results:</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {teamMatches.map((match, idx) => (
+                                                            <div
+                                                                key={idx}
+                                                                className={`px-3 py-2 rounded-lg text-sm ${
+                                                                    match.won 
+                                                                        ? 'bg-green-600 text-white border border-green-400' 
+                                                                        : 'bg-red-600 text-white border border-red-400'
+                                                                }`}
+                                                            >
+                                                                <div className="font-semibold">
+                                                                    <span className="font-bold">{match.won ? 'W' : 'L'}</span>
+                                                                    {' '}
+                                                                    {match.teamScore}-{match.opponentScore}
+                                                                    {match.tiebreakScore && ` (${match.tiebreakScore})`}
+                                                                </div>
+                                                                <div className="text-xs mt-1">
+                                                                    {match.teamPlayers}
+                                                                </div>
+                                                                <div className="text-xs font-normal mt-1">
+                                                                    vs {match.opponentPlayers}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Rounds */}
+                        {currentDivision.rounds.map(round => (
+                            <div key={round.id} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-yellow-400">{round.name}</h2>
+                                        <p className="text-yellow-200">
+                                            Point Value: {round.pointValue} {round.pointValue === 1 ? 'point' : 'points'} per win
+                                        </p>
+                                    </div>
+                                    {isDirector && (
+                                        <select
+                                            onChange={(e) => {
+                                                const teams = e.target.value.split('-');
+                                                if (teams.length === 2) {
+                                                    addMatch(activeTab, round.id, parseInt(teams[0]), parseInt(teams[1]));
+                                                }
+                                            }}
+                                            className="px-4 py-2 border-2 border-yellow-500 bg-gray-800 text-yellow-200 rounded-lg font-semibold hover:bg-gray-700"
+                                            value=""
+                                        >
+                                            <option value="">+ Add Match</option>
+                                            {currentDivision.teams.map(team1 =>
+                                                currentDivision.teams
+                                                    .filter(team2 => team2.id !== team1.id)
+                                                    .map(team2 => (
+                                                        <option key={`${team1.id}-${team2.id}`} value={`${team1.id}-${team2.id}`}>
+                                                            {team1.name} vs {team2.name}
+                                                        </option>
+                                                    ))
+                                            )}
+                                        </select>
+                                    )}
+                                </div>
+
+                                <div className="space-y-4">
+                                    {round.matches.length === 0 ? (
+                                        <p className="text-gray-400 text-center py-8">No matches scheduled</p>
+                                    ) : (
+                                        round.matches.map(match => (
+                                            <div
+                                                key={match.id}
+                                                className={`border-2 rounded-lg p-4 ${
+                                                    match.completed ? 'bg-gray-700 border-green-500' : 'bg-gray-800 border-gray-600'
+                                                }`}
+                                            >
+                                                {(match.team1Games > 0 || match.team2Games > 0 || match.completed) && (
+                                                    <div className="text-center mb-4 pb-4 border-b-2 border-gray-600">
+                                                        <p className="text-sm text-gray-400 mb-1">Match Score</p>
+                                                        <p className="text-5xl font-bold text-yellow-400">
+                                                            {match.team1Games} - {match.team2Games}
+                                                        </p>
+                                                        {match.tiebreakScore && (
+                                                            <p className="text-xl font-semibold text-red-400 mt-2">
+                                                                Tiebreak: {match.tiebreakScore}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-yellow-400 mb-2">
+                                                            {getTeamName(activeTab, match.team1)}
+                                                        </h3>
+                                                        {isDirector && !match.completed ? (
+                                                            <div className="space-y-2 mb-2">
+                                                                <select
+                                                                    value={match.team1Player1}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team1Player1: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 1</option>
+                                                                    {getTeamPlayers(activeTab, match.team1).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <select
+                                                                    value={match.team1Player2}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team1Player2: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 2</option>
+                                                                    {getTeamPlayers(activeTab, match.team1).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-yellow-200 mb-2">{match.team1Player1} & {match.team1Player2}</p>
+                                                        )}
+                                                        {isDirector && !match.completed ? (
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max="4"
+                                                                placeholder="Games"
+                                                                value={match.team1Games}
+                                                                onChange={(e) =>
+                                                                    updateMatch(activeTab, round.id, match.id, {
+                                                                        team1Games: parseInt(e.target.value) || 0
+                                                                    })
+                                                                }
+                                                                className="w-24 px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-400 rounded text-center text-2xl font-bold"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-4xl font-bold text-yellow-400">{match.team1Games}</p>
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-yellow-400 mb-2">
+                                                            {getTeamName(activeTab, match.team2)}
+                                                        </h3>
+                                                        {isDirector && !match.completed ? (
+                                                            <div className="space-y-2 mb-2">
+                                                                <select
+                                                                    value={match.team2Player1}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team2Player1: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 1</option>
+                                                                    {getTeamPlayers(activeTab, match.team2).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <select
+                                                                    value={match.team2Player2}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team2Player2: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 2</option>
+                                                                    {getTeamPlayers(activeTab, match.team2).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-yellow-200 mb-2">{match.team2Player1} & {match.team2Player2}</p>
+                                                        )}
+                                                        {isDirector && !match.completed ? (
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max="4"
+                                                                placeholder="Games"
+                                                                value={match.team2Games}
+                                                                onChange={(e) =>
+                                                                    updateMatch(activeTab, round.id, match.id, {
+                                                                        team2Games: parseInt(e.target.value) || 0
+                                                                    })
+                                                                }
+                                                                className="w-24 px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-400 rounded text-center text-2xl font-bold"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-4xl font-bold text-yellow-400">{match.team2Games}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {((match.team1Games === 3 && match.team2Games === 3) || match.tiebreakScore) && (
+                                                    <div className="mt-4 pt-4 border-t border-gray-600">
+                                                        <p className="font-semibold text-yellow-200 mb-2">Tiebreak (first to 7)</p>
+                                                        {isDirector && !match.completed ? (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="e.g., 7-5"
+                                                                value={match.tiebreakScore}
+                                                                onChange={(e) =>
+                                                                    updateMatch(activeTab, round.id, match.id, {
+                                                                        tiebreakScore: e.target.value
+                                                                    })
+                                                                }
+                                                                className="w-32 px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-xl font-bold text-red-400">{match.tiebreakScore}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {isDirector && (
+                                                    <div className="mt-4 flex gap-2">
+                                                        {!match.completed ? (
+                                                            <button
+                                                                onClick={() => completeMatch(activeTab, round.id, match.id)}
+                                                                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-500 hover:to-green-600 font-semibold shadow-lg"
+                                                            >
+                                                                Complete Match
+                                                            </button>
+                                                        ) : (
+                                                            <span className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow-lg">
+                                                                ✓ Completed
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => deleteMatch(activeTab, round.id, match.id)}
+                                                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-500 hover:to-red-600 font-semibold shadow-lg"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Password Modal */}
+                        {showPasswordModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg p-6 w-96">
+                                    <h3 className="text-xl font-bold mb-4">Tournament Director Login</h3>
+                                    <input
+                                        type="password"
+                                        placeholder="Enter password"
+                                        value={passwordInput}
+                                        onChange={(e) => setPasswordInput(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                                        className="w-full px-4 py-2 border rounded mb-4"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={handleLogin}
+                                            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                        >
+                                            Login
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowPasswordModal(false);
+                                                setPasswordInput('');
+                                            }}
+                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <p className="text-sm text-gray-600 mt-4">Default password: director123</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Team Management Modal */}
+                        {showTeamManagement && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-2xl font-bold">Team Management</h3>
+                                        <button
+                                            onClick={() => setShowTeamManagement(false)}
+                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+
+                                    <div className="flex gap-4 mb-6">
+                                        <button
+                                            onClick={() => setEditingDivision('championship')}
+                                            className={`flex-1 py-2 px-4 rounded-lg font-semibold ${
+                                                editingDivision === 'championship'
+                                                    ? 'bg-blue-600 text-white'
+                                                    : 'bg-gray-200 text-gray-700'
+                                            }`}
+                                        >
+                                            Championship Cup
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingDivision('classic')}
+                                            className={`flex-1 py-2 px-4 rounded-lg font-semibold ${
+                                                editingDivision === 'classic'
+                                                    ? 'bg-green-600 text-white'
+                                                    : 'bg-gray-200 text-gray-700'
+                                            }`}
+                                        >
+                                            Classic Cup
+                                        </button>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        {tournamentData[editingDivision].teams.map((team) => (
+                                            <div key={team.id} className="border-2 border-gray-300 rounded-lg p-4">
+                                                <div className="mb-4">
+                                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        Team Name
+                                                    </label>
+                                                    <input
+                                                        type="text"
+                                                        value={team.name}
+                                                        onChange={(e) => updateTeamName(editingDivision, team.id, e.target.value)}
+                                                        className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg text-lg font-bold"
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                        Players
+                                                    </label>
+                                                    <div className="space-y-2">
+                                                        {team.players.map((player, idx) => (
+                                                            <div key={idx} className="flex items-center gap-2">
+                                                                <span className="text-gray-600 font-semibold w-8">#{idx + 1}</span>
+                                                                <input
+                                                                    type="text"
+                                                                    value={player}
+                                                                    onChange={(e) =>
+                                                                        updatePlayerName(editingDivision, team.id, idx, e.target.value)
+                                                                    }
+                                                                    className="flex-1 px-3 py-2 border rounded"
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                                        <p className="text-sm text-blue-800">
+                                            <strong>Note:</strong> Changes are saved automatically. Make sure all player names are unique within each team for best results.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Export Modal */}
+                        {showExportModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+                                    <h3 className="text-2xl font-bold mb-4">📤 Export Tournament Data</h3>
+                                    <p className="text-gray-700 mb-4">
+                                        Copy this code and share it with all players. They can paste it using the "Import" button to see the latest updates!
+                                    </p>
+                                    <textarea
+                                        value={exportCode}
+                                        readOnly
+                                        className="w-full h-32 p-3 border-2 border-green-300 rounded-lg font-mono text-sm mb-4 bg-gray-50"
+                                        onClick={(e) => e.target.select()}
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={copyToClipboard}
+                                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold"
+                                        >
+                                            📋 Copy to Clipboard
+                                        </button>
+                                        <button
+                                            onClick={() => setShowExportModal(false)}
+                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Import Modal */}
+                        {showImportModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+                                    <h3 className="text-2xl font-bold mb-4">📥 Import Tournament Data</h3>
+                                    <p className="text-gray-700 mb-4">
+                                        Paste the code from the tournament director to get the latest updates!
+                                    </p>
+                                    <textarea
+                                        value={importCode}
+                                        onChange={(e) => setImportCode(e.target.value)}
+                                        placeholder="Paste the export code here..."
+                                        className="w-full h-32 p-3 border-2 border-blue-300 rounded-lg font-mono text-sm mb-4"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={handleImport}
+                                            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold"
+                                        >
+                                            ✅ Import Data
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowImportModal(false);
+                                                setImportCode('');
+                                            }}
+                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        // Render
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<TournamentApp />);
+        root.render(<TennisTournamentApp />);
     </script>
 </body>
 </html>
