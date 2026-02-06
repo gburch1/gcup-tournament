@@ -4,28 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The G Cup Tournament</title>
-   <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Load scripts in correct order for Firebase -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-                sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
+
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5UW3GO_y-hVWXLBG6SZWwhf041nvUkEQ",
+            authDomain: "thegcup-gthang.firebaseapp.com",
+            databaseURL: "https://thegcup-gthang-default-rtdb.firebaseio.com",
+            projectId: "thegcup-gthang",
+            storageBucket: "thegcup-gthang.firebasestorage.app",
+            messagingSenderId: "36937413793",
+            appId: "1:36937413793:web:7764b576b4b0ac7da5ece0"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
 
         // Lucide React icons as inline SVG components
         const Trophy = ({ className }) => (
@@ -77,10 +85,6 @@
             const [showPasswordModal, setShowPasswordModal] = useState(false);
             const [showTeamManagement, setShowTeamManagement] = useState(false);
             const [editingDivision, setEditingDivision] = useState('championship');
-            const [showExportModal, setShowExportModal] = useState(false);
-            const [showImportModal, setShowImportModal] = useState(false);
-            const [exportCode, setExportCode] = useState('');
-            const [importCode, setImportCode] = useState('');
 
             // Initialize tournament data
             const [tournamentData, setTournamentData] = useState({
@@ -114,24 +118,32 @@
                 }
             });
 
-            // Load data from localStorage
+            // Load data from Firebase on mount
             useEffect(() => {
-                const saved = localStorage.getItem('tennisTournamentData');
-                if (saved) {
-                    setTournamentData(JSON.parse(saved));
-                }
-                const savedPassword = localStorage.getItem('directorPassword');
-                if (savedPassword) {
-                    setDirectorPassword(savedPassword);
-                } else {
-                    setDirectorPassword('director123');
-                    localStorage.setItem('directorPassword', 'director123');
-                }
+                const dataRef = database.ref('tournamentData');
+                
+                // Initial load
+                dataRef.once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        setTournamentData(snapshot.val());
+                    }
+                });
+
+                // Listen for real-time updates
+                dataRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        setTournamentData(snapshot.val());
+                    }
+                });
+
+                return () => dataRef.off();
             }, []);
 
-            // Save data to localStorage
+            // Save data to Firebase whenever it changes
             useEffect(() => {
-                localStorage.setItem('tennisTournamentData', JSON.stringify(tournamentData));
+                if (tournamentData) {
+                    database.ref('tournamentData').set(tournamentData);
+                }
             }, [tournamentData]);
 
             const handleLogin = () => {
@@ -301,32 +313,6 @@
                 return team ? team.players : [];
             };
 
-            const handleExport = () => {
-                const dataString = JSON.stringify(tournamentData);
-                const encoded = btoa(dataString);
-                setExportCode(encoded);
-                setShowExportModal(true);
-            };
-
-            const handleImport = () => {
-                try {
-                    const decoded = atob(importCode);
-                    const imported = JSON.parse(decoded);
-                    setTournamentData(imported);
-                    localStorage.setItem('tennisTournamentData', JSON.stringify(imported));
-                    setShowImportModal(false);
-                    setImportCode('');
-                    alert('✅ Data imported successfully! Tournament updated.');
-                } catch (error) {
-                    alert('❌ Invalid import code. Please check and try again.');
-                }
-            };
-
-            const copyToClipboard = () => {
-                navigator.clipboard.writeText(exportCode);
-                alert('✅ Code copied to clipboard! Share with players.');
-            };
-
             const updateTeamName = (division, teamId, newName) => {
                 setTournamentData(prev => ({
                     ...prev,
@@ -378,28 +364,14 @@
                                 </div>
                                 <div className="flex gap-3 flex-wrap">
                                     {isDirector && (
-                                        <>
-                                            <button
-                                                onClick={() => setShowTeamManagement(true)}
-                                                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500 shadow-lg"
-                                            >
-                                                <Users className="w-5 h-5" />
-                                                Manage Teams
-                                            </button>
-                                            <button
-                                                onClick={handleExport}
-                                                className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-400 hover:to-green-500 shadow-lg"
-                                            >
-                                                📤 Export
-                                            </button>
-                                        </>
+                                        <button
+                                            onClick={() => setShowTeamManagement(true)}
+                                            className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500 shadow-lg"
+                                        >
+                                            <Users className="w-5 h-5" />
+                                            Manage Teams
+                                        </button>
                                     )}
-                                    <button
-                                        onClick={() => setShowImportModal(true)}
-                                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500 shadow-lg"
-                                    >
-                                        📥 Import
-                                    </button>
                                     <button
                                         onClick={() => {
                                             if (isDirector) {
@@ -862,73 +834,6 @@
                                         <p className="text-sm text-blue-800">
                                             <strong>Note:</strong> Changes are saved automatically. Make sure all player names are unique within each team for best results.
                                         </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Export Modal */}
-                        {showExportModal && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                                <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-                                    <h3 className="text-2xl font-bold mb-4">📤 Export Tournament Data</h3>
-                                    <p className="text-gray-700 mb-4">
-                                        Copy this code and share it with all players. They can paste it using the "Import" button to see the latest updates!
-                                    </p>
-                                    <textarea
-                                        value={exportCode}
-                                        readOnly
-                                        className="w-full h-32 p-3 border-2 border-green-300 rounded-lg font-mono text-sm mb-4 bg-gray-50"
-                                        onClick={(e) => e.target.select()}
-                                    />
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={copyToClipboard}
-                                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-semibold"
-                                        >
-                                            📋 Copy to Clipboard
-                                        </button>
-                                        <button
-                                            onClick={() => setShowExportModal(false)}
-                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-                                        >
-                                            Close
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Import Modal */}
-                        {showImportModal && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                                <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-                                    <h3 className="text-2xl font-bold mb-4">📥 Import Tournament Data</h3>
-                                    <p className="text-gray-700 mb-4">
-                                        Paste the code from the tournament director to get the latest updates!
-                                    </p>
-                                    <textarea
-                                        value={importCode}
-                                        onChange={(e) => setImportCode(e.target.value)}
-                                        placeholder="Paste the export code here..."
-                                        className="w-full h-32 p-3 border-2 border-blue-300 rounded-lg font-mono text-sm mb-4"
-                                    />
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={handleImport}
-                                            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-semibold"
-                                        >
-                                            ✅ Import Data
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowImportModal(false);
-                                                setImportCode('');
-                                            }}
-                                            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
-                                        >
-                                            Cancel
-                                        </button>
                                     </div>
                                 </div>
                             </div>
