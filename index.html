@@ -5,19 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The G Cup Tournament</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
 </head>
 <body>
-    <div id="root">
-        <div class="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
-            <div class="text-yellow-400 text-2xl font-bold">Loading tournament data...</div>
-        </div>
-    </div>
+    <div id="root"></div>
 
-    <!-- Load Firebase first -->
+    <!-- Load Firebase FIRST -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
-    <!-- Load React -->
+    <!-- Then load React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -33,29 +40,19 @@
             projectId: "thegcup-gthang",
             storageBucket: "thegcup-gthang.firebasestorage.app",
             messagingSenderId: "36937413793",
-            appId: "1:36937413793:web:7764b576b4b0ac7da5ece0"
+            appId: "1:36937413793:web:7764b576b4b0ac7da5ece0",
+            measurementId: "G-SZS6P557EK"
         };
 
         // Initialize Firebase
-        let app;
-        let database;
-        
-        try {
-            if (!firebase.apps.length) {
-                app = firebase.initializeApp(firebaseConfig);
-            } else {
-                app = firebase.app();
-            }
-            database = firebase.database();
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            console.error("Firebase initialization error:", error);
-            alert("Error connecting to database. Please check your internet connection.");
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const database = firebase.database();
 
-        // Lucide React icons
+        // Lucide React icons as inline SVG components
         const Trophy = ({ className }) => (
-            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
                 <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
                 <path d="M4 22h16"></path>
@@ -66,7 +63,7 @@
         );
 
         const Users = ({ className }) => (
-            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -75,21 +72,21 @@
         );
 
         const Award = ({ className }) => (
-            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="8" r="6"></circle>
                 <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
             </svg>
         );
 
         const Lock = ({ className }) => (
-            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
         );
 
         const Unlock = ({ className }) => (
-            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
             </svg>
@@ -97,15 +94,15 @@
 
         const TennisTournamentApp = () => {
             const [isDirector, setIsDirector] = useState(false);
-            const [directorPassword] = useState('director123');
+            const [directorPassword, setDirectorPassword] = useState('director123');
             const [passwordInput, setPasswordInput] = useState('');
             const [activeTab, setActiveTab] = useState('championship');
             const [showPasswordModal, setShowPasswordModal] = useState(false);
             const [showTeamManagement, setShowTeamManagement] = useState(false);
             const [editingDivision, setEditingDivision] = useState('championship');
             const [loading, setLoading] = useState(true);
-            const [error, setError] = useState(null);
 
+            // Initialize tournament data
             const initialData = {
                 championship: {
                     teams: [
@@ -119,7 +116,8 @@
                         { id: 2, name: 'Round 2', pointValue: 1, matches: [] },
                         { id: 3, name: 'Round 3', pointValue: 2, matches: [] },
                         { id: 4, name: 'Round 4', pointValue: 2, matches: [] }
-                    ]
+                    ],
+                    tiebreaker: null
                 },
                 classic: {
                     teams: [
@@ -131,52 +129,41 @@
                         { id: 2, name: 'Round 2', pointValue: 1, matches: [] },
                         { id: 3, name: 'Round 3', pointValue: 2, matches: [] },
                         { id: 4, name: 'Round 4', pointValue: 2, matches: [] }
-                    ]
+                    ],
+                    tiebreaker: null
                 }
             };
 
             const [tournamentData, setTournamentData] = useState(initialData);
 
+            // Load data from Firebase on mount
             useEffect(() => {
-                if (!database) {
-                    setError("Database connection failed");
-                    setLoading(false);
-                    return;
-                }
-
                 const dataRef = database.ref('tournamentData');
                 
-                dataRef.once('value')
-                    .then((snapshot) => {
-                        if (snapshot.exists()) {
-                            setTournamentData(snapshot.val());
-                        } else {
-                            dataRef.set(initialData);
-                        }
-                        setLoading(false);
-                    })
-                    .catch((err) => {
-                        console.error("Error loading data:", err);
-                        setError("Failed to load tournament data");
-                        setLoading(false);
-                    });
+                dataRef.once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        setTournamentData(snapshot.val());
+                    } else {
+                        // Initialize Firebase with default data
+                        dataRef.set(initialData);
+                    }
+                    setLoading(false);
+                });
 
+                // Listen for real-time updates
                 dataRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         setTournamentData(snapshot.val());
                     }
                 });
 
+                // Cleanup listener on unmount
                 return () => dataRef.off();
             }, []);
 
+            // Save to Firebase whenever data changes
             const saveToFirebase = (data) => {
-                if (database) {
-                    database.ref('tournamentData').set(data).catch(err => {
-                        console.error("Save error:", err);
-                        alert("Error saving data. Please try again.");
-                    });
-                }
+                database.ref('tournamentData').set(data);
             };
 
             const handleLogin = () => {
@@ -189,6 +176,185 @@
                 }
             };
 
+            const addMatch = (division, roundId, team1Id, team2Id) => {
+                const newMatch = {
+                    id: Date.now(),
+                    team1: team1Id,
+                    team2: team2Id,
+                    team1Player1: '',
+                    team1Player2: '',
+                    team2Player1: '',
+                    team2Player2: '',
+                    team1Games: 0,
+                    team2Games: 0,
+                    tiebreakScore: '',
+                    completed: false
+                };
+
+                const updatedData = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        rounds: tournamentData[division].rounds.map(round =>
+                            round.id === roundId
+                                ? { ...round, matches: [...round.matches, newMatch] }
+                                : round
+                        )
+                    }
+                };
+                
+                setTournamentData(updatedData);
+                saveToFirebase(updatedData);
+            };
+
+            const updateMatch = (division, roundId, matchId, updates) => {
+                const updatedData = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        rounds: tournamentData[division].rounds.map(round =>
+                            round.id === roundId
+                                ? {
+                                    ...round,
+                                    matches: round.matches.map(match =>
+                                        match.id === matchId ? { ...match, ...updates } : match
+                                    )
+                                }
+                                : round
+                        )
+                    }
+                };
+                
+                setTournamentData(updatedData);
+                saveToFirebase(updatedData);
+            };
+
+            const completeMatch = (division, roundId, matchId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                const match = round.matches.find(m => m.id === matchId);
+                
+                if (!match.team1Player1 || !match.team1Player2 || !match.team2Player1 || !match.team2Player2) {
+                    alert('Please select all players for both teams');
+                    return;
+                }
+
+                // Determine winner - if games are tied, check tiebreak score
+                let winner;
+                if (match.team1Games === match.team2Games && match.team1Games === 3) {
+                    // It's 3-3, need to check tiebreak
+                    if (!match.tiebreakScore || !match.tiebreakScore.includes('-')) {
+                        alert('Please enter the tiebreak score (e.g., 7-5)');
+                        return;
+                    }
+                    // Parse tiebreak score like "7-5" or "5-7"
+                    const tiebreakParts = match.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                    if (tiebreakParts.length === 2 && !isNaN(tiebreakParts[0]) && !isNaN(tiebreakParts[1])) {
+                        winner = tiebreakParts[0] > tiebreakParts[1] ? match.team1 : match.team2;
+                    } else {
+                        alert('Invalid tiebreak score format. Please use format like "7-5"');
+                        return;
+                    }
+                } else {
+                    // Regular winner based on games
+                    winner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                }
+                
+                const pointValue = round.pointValue;
+
+                const updatedData = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        teams: tournamentData[division].teams.map(team =>
+                            team.id === winner
+                                ? { ...team, points: team.points + pointValue }
+                                : team
+                        ),
+                        rounds: tournamentData[division].rounds.map(r =>
+                            r.id === roundId
+                                ? {
+                                    ...r,
+                                    matches: r.matches.map(m =>
+                                        m.id === matchId ? { ...m, completed: true } : m
+                                    )
+                                }
+                                : r
+                        )
+                    }
+                };
+                
+                setTournamentData(updatedData);
+                saveToFirebase(updatedData);
+            };
+
+            const deleteMatch = (division, roundId, matchId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                const match = round.matches.find(m => m.id === matchId);
+                
+                let updatedData;
+                
+                if (match.completed) {
+                    // Determine winner to deduct points
+                    let winner;
+                    if (match.team1Games === match.team2Games && match.team1Games === 3) {
+                        const tiebreakParts = match.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                        winner = tiebreakParts[0] > tiebreakParts[1] ? match.team1 : match.team2;
+                    } else {
+                        winner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                    }
+                    
+                    const pointValue = round.pointValue;
+                    
+                    updatedData = {
+                        ...tournamentData,
+                        [division]: {
+                            ...tournamentData[division],
+                            teams: tournamentData[division].teams.map(team =>
+                                team.id === winner
+                                    ? { ...team, points: team.points - pointValue }
+                                    : team
+                            ),
+                            rounds: tournamentData[division].rounds.map(r =>
+                                r.id === roundId
+                                    ? {
+                                        ...r,
+                                        matches: r.matches.filter(m => m.id !== matchId)
+                                    }
+                                    : r
+                            )
+                        }
+                    };
+                } else {
+                    updatedData = {
+                        ...tournamentData,
+                        [division]: {
+                            ...tournamentData[division],
+                            rounds: tournamentData[division].rounds.map(r =>
+                                r.id === roundId
+                                    ? {
+                                        ...r,
+                                        matches: r.matches.filter(m => m.id !== matchId)
+                                    }
+                                    : r
+                            )
+                        }
+                    };
+                }
+                
+                setTournamentData(updatedData);
+                saveToFirebase(updatedData);
+            };
+
+            const getTeamName = (division, teamId) => {
+                const team = tournamentData[division].teams.find(t => t.id === teamId);
+                return team ? team.name : '';
+            };
+
+            const getTeamPlayers = (division, teamId) => {
+                const team = tournamentData[division].teams.find(t => t.id === teamId);
+                return team ? team.players : [];
+            };
+
             const updateTeamName = (division, teamId, newName) => {
                 const updatedData = {
                     ...tournamentData,
@@ -199,6 +365,7 @@
                         )
                     }
                 };
+                
                 setTournamentData(updatedData);
                 saveToFirebase(updatedData);
             };
@@ -220,6 +387,7 @@
                         )
                     }
                 };
+                
                 setTournamentData(updatedData);
                 saveToFirebase(updatedData);
             };
@@ -232,23 +400,6 @@
                 );
             }
 
-            if (error) {
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center p-4">
-                        <div className="bg-red-900 text-white p-6 rounded-lg max-w-md">
-                            <h2 className="text-xl font-bold mb-2">Connection Error</h2>
-                            <p>{error}</p>
-                            <button 
-                                onClick={() => window.location.reload()} 
-                                className="mt-4 px-4 py-2 bg-white text-red-900 rounded hover:bg-gray-100"
-                            >
-                                Retry
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
             const currentDivision = tournamentData[activeTab];
             const sortedTeams = [...currentDivision.teams].sort((a, b) => b.points - a.points);
 
@@ -256,8 +407,8 @@
                 <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 p-4">
                     <div className="max-w-7xl mx-auto">
                         {/* Header */}
-                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
-                            <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500 relative overflow-hidden">
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <Trophy className="w-10 h-10 text-yellow-400" />
                                     <div>
@@ -328,27 +479,312 @@
                         <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
                             <h2 className="text-2xl font-bold text-yellow-400 mb-4">Standings</h2>
                             <div className="space-y-3">
-                                {sortedTeams.map((team, index) => (
-                                    <div
-                                        key={team.id}
-                                        className={`p-4 rounded-lg ${
-                                            index === 0 ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-2 border-yellow-400 shadow-lg' : 'bg-gray-800 border-2 border-gray-600'
-                                        }`}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-4">
-                                                <span className={`text-2xl font-bold w-8 ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>#{index + 1}</span>
-                                                <div>
-                                                    <h3 className={`text-xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>{team.name}</h3>
-                                                    <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>{team.players.join(', ')}</p>
+                                {sortedTeams.map((team, index) => {
+                                    const teamMatches = currentDivision.rounds.flatMap(round => 
+                                        round.matches
+                                            .filter(match => match.completed && (match.team1 === team.id || match.team2 === team.id))
+                                            .map(match => {
+                                                const isTeam1 = match.team1 === team.id;
+                                                
+                                                // Determine winner for display
+                                                let matchWinner;
+                                                if (match.team1Games === match.team2Games && match.team1Games === 3) {
+                                                    const tiebreakParts = match.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                                                    matchWinner = tiebreakParts[0] > tiebreakParts[1] ? match.team1 : match.team2;
+                                                } else {
+                                                    matchWinner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                                                }
+                                                
+                                                return {
+                                                    ...match,
+                                                    roundName: round.name,
+                                                    isTeam1: isTeam1,
+                                                    opponent: isTeam1 ? 
+                                                        getTeamName(activeTab, match.team2) : 
+                                                        getTeamName(activeTab, match.team1),
+                                                    teamScore: isTeam1 ? match.team1Games : match.team2Games,
+                                                    opponentScore: isTeam1 ? match.team2Games : match.team1Games,
+                                                    won: matchWinner === team.id,
+                                                    teamPlayers: isTeam1 ?
+                                                        `${match.team1Player1} & ${match.team1Player2}` :
+                                                        `${match.team2Player1} & ${match.team2Player2}`,
+                                                    opponentPlayers: isTeam1 ?
+                                                        `${match.team2Player1} & ${match.team2Player2}` :
+                                                        `${match.team1Player1} & ${match.team1Player2}`
+                                                };
+                                            })
+                                    );
+
+                                    return (
+                                        <div
+                                            key={team.id}
+                                            className={`p-4 rounded-lg ${
+                                                index === 0 ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-2 border-yellow-400 shadow-lg' : 'bg-gray-800 border-2 border-gray-600'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-4">
+                                                    <span className={`text-2xl font-bold w-8 ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>#{index + 1}</span>
+                                                    <div>
+                                                        <h3 className={`text-xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>{team.name}</h3>
+                                                        <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>{team.players.join(', ')}</p>
+                                                    </div>
                                                 </div>
+                                                <div className={`text-3xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>{team.points} pts</div>
                                             </div>
-                                            <div className={`text-3xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>{team.points} pts</div>
+                                            
+                                            {teamMatches.length > 0 && (
+                                                <div className={`mt-3 pt-3 ${index === 0 ? 'border-t border-gray-700' : 'border-t border-gray-600'}`}>
+                                                    <p className={`text-sm font-semibold mb-2 ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>Match Results:</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {teamMatches.map((match, idx) => (
+                                                            <div
+                                                                key={idx}
+                                                                className={`px-3 py-2 rounded-lg text-sm ${
+                                                                    match.won 
+                                                                        ? 'bg-green-600 text-white border border-green-400' 
+                                                                        : 'bg-red-600 text-white border border-red-400'
+                                                                }`}
+                                                            >
+                                                                <div className="font-semibold">
+                                                                    <span className="font-bold">{match.won ? 'W' : 'L'}</span>
+                                                                    {' '}
+                                                                    {match.teamScore}-{match.opponentScore}
+                                                                    {match.tiebreakScore && ` (${match.tiebreakScore})`}
+                                                                </div>
+                                                                <div className="text-xs mt-1">
+                                                                    {match.teamPlayers}
+                                                                </div>
+                                                                <div className="text-xs font-normal mt-1">
+                                                                    vs {match.opponentPlayers}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
+
+                        {/* Rounds - rest of the component continues with same pattern */}
+                        {currentDivision.rounds.map(round => (
+                            <div key={round.id} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
+                                <div className="flex items-center justify-between mb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-yellow-400">{round.name}</h2>
+                                        <p className="text-yellow-200">
+                                            Point Value: {round.pointValue} {round.pointValue === 1 ? 'point' : 'points'} per win
+                                        </p>
+                                    </div>
+                                    {isDirector && (
+                                        <select
+                                            onChange={(e) => {
+                                                const teams = e.target.value.split('-');
+                                                if (teams.length === 2) {
+                                                    addMatch(activeTab, round.id, parseInt(teams[0]), parseInt(teams[1]));
+                                                }
+                                            }}
+                                            className="px-4 py-2 border-2 border-yellow-500 bg-gray-800 text-yellow-200 rounded-lg font-semibold hover:bg-gray-700"
+                                            value=""
+                                        >
+                                            <option value="">+ Add Match</option>
+                                            {currentDivision.teams.map(team1 =>
+                                                currentDivision.teams
+                                                    .filter(team2 => team2.id !== team1.id)
+                                                    .map(team2 => (
+                                                        <option key={`${team1.id}-${team2.id}`} value={`${team1.id}-${team2.id}`}>
+                                                            {team1.name} vs {team2.name}
+                                                        </option>
+                                                    ))
+                                            )}
+                                        </select>
+                                    )}
+                                </div>
+
+                                <div className="space-y-4">
+                                    {round.matches.length === 0 ? (
+                                        <p className="text-gray-400 text-center py-8">No matches scheduled</p>
+                                    ) : (
+                                        round.matches.map(match => (
+                                            <div
+                                                key={match.id}
+                                                className={`border-2 rounded-lg p-4 ${
+                                                    match.completed ? 'bg-gray-700 border-green-500' : 'bg-gray-800 border-gray-600'
+                                                }`}
+                                            >
+                                                {(match.team1Games > 0 || match.team2Games > 0 || match.completed) && (
+                                                    <div className="text-center mb-4 pb-4 border-b-2 border-gray-600">
+                                                        <p className="text-sm text-gray-400 mb-1">Match Score</p>
+                                                        <p className="text-5xl font-bold text-yellow-400">
+                                                            {match.team1Games} - {match.team2Games}
+                                                        </p>
+                                                        {match.tiebreakScore && (
+                                                            <p className="text-xl font-semibold text-red-400 mt-2">
+                                                                Tiebreak: {match.tiebreakScore}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-yellow-400 mb-2">
+                                                            {getTeamName(activeTab, match.team1)}
+                                                        </h3>
+                                                        {isDirector && !match.completed ? (
+                                                            <div className="space-y-2 mb-2">
+                                                                <select
+                                                                    value={match.team1Player1}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team1Player1: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 1</option>
+                                                                    {getTeamPlayers(activeTab, match.team1).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <select
+                                                                    value={match.team1Player2}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team1Player2: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 2</option>
+                                                                    {getTeamPlayers(activeTab, match.team1).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-yellow-200 mb-2">{match.team1Player1} & {match.team1Player2}</p>
+                                                        )}
+                                                        {isDirector && !match.completed ? (
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max="4"
+                                                                placeholder="Games"
+                                                                value={match.team1Games}
+                                                                onChange={(e) =>
+                                                                    updateMatch(activeTab, round.id, match.id, {
+                                                                        team1Games: parseInt(e.target.value) || 0
+                                                                    })
+                                                                }
+                                                                className="w-24 px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-400 rounded text-center text-2xl font-bold"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-4xl font-bold text-yellow-400">{match.team1Games}</p>
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <h3 className="font-bold text-lg text-yellow-400 mb-2">
+                                                            {getTeamName(activeTab, match.team2)}
+                                                        </h3>
+                                                        {isDirector && !match.completed ? (
+                                                            <div className="space-y-2 mb-2">
+                                                                <select
+                                                                    value={match.team2Player1}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team2Player1: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 1</option>
+                                                                    {getTeamPlayers(activeTab, match.team2).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <select
+                                                                    value={match.team2Player2}
+                                                                    onChange={(e) =>
+                                                                        updateMatch(activeTab, round.id, match.id, { team2Player2: e.target.value })
+                                                                    }
+                                                                    className="w-full px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                                >
+                                                                    <option value="">Select Player 2</option>
+                                                                    {getTeamPlayers(activeTab, match.team2).map((player, idx) => (
+                                                                        <option key={idx} value={player}>{player}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-yellow-200 mb-2">{match.team2Player1} & {match.team2Player2}</p>
+                                                        )}
+                                                        {isDirector && !match.completed ? (
+                                                            <input
+                                                                type="number"
+                                                                min="0"
+                                                                max="4"
+                                                                placeholder="Games"
+                                                                value={match.team2Games}
+                                                                onChange={(e) =>
+                                                                    updateMatch(activeTab, round.id, match.id, {
+                                                                        team2Games: parseInt(e.target.value) || 0
+                                                                    })
+                                                                }
+                                                                className="w-24 px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-400 rounded text-center text-2xl font-bold"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-4xl font-bold text-yellow-400">{match.team2Games}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {((match.team1Games === 3 && match.team2Games === 3) || match.tiebreakScore) && (
+                                                    <div className="mt-4 pt-4 border-t border-gray-600">
+                                                        <p className="font-semibold text-yellow-200 mb-2">Tiebreak (first to 7)</p>
+                                                        {isDirector && !match.completed ? (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="e.g., 7-5"
+                                                                value={match.tiebreakScore}
+                                                                onChange={(e) =>
+                                                                    updateMatch(activeTab, round.id, match.id, {
+                                                                        tiebreakScore: e.target.value
+                                                                    })
+                                                                }
+                                                                className="w-32 px-3 py-2 border border-gray-600 bg-gray-700 text-yellow-200 rounded"
+                                                            />
+                                                        ) : (
+                                                            <p className="text-xl font-bold text-red-400">{match.tiebreakScore}</p>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {isDirector && (
+                                                    <div className="mt-4 flex gap-2">
+                                                        {!match.completed ? (
+                                                            <button
+                                                                onClick={() => completeMatch(activeTab, round.id, match.id)}
+                                                                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-500 hover:to-green-600 font-semibold shadow-lg"
+                                                            >
+                                                                Complete Match
+                                                            </button>
+                                                        ) : (
+                                                            <span className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold shadow-lg">
+                                                                ✓ Completed
+                                                            </span>
+                                                        )}
+                                                        <button
+                                                            onClick={() => deleteMatch(activeTab, round.id, match.id)}
+                                                            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-500 hover:to-red-600 font-semibold shadow-lg"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        ))}
 
                         {/* Password Modal */}
                         {showPasswordModal && (
@@ -387,13 +823,13 @@
 
                         {/* Team Management Modal */}
                         {showTeamManagement && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                                <div className="bg-white rounded-lg p-6 w-full max-w-4xl my-8">
-                                    <div className="flex items-center justify-between mb-6">
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between mb-6 sticky top-0 bg-white pb-4 border-b z-10">
                                         <h3 className="text-2xl font-bold">Team Management</h3>
                                         <button
                                             onClick={() => setShowTeamManagement(false)}
-                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 flex-shrink-0"
                                         >
                                             Close
                                         </button>
