@@ -25,97 +25,541 @@
         // Initialize Supabase
         const SUPABASE_URL = 'https://fzysighdknwkdevtgczn.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ6eXNpZ2hka253a2RldnRnY3puIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0MDk1MjgsImV4cCI6MjA4NTk4NTUyOH0.XmhgXMboIx1O0ml_NajO8hdHygHM3a2qjqY4IQeERq4';
-        
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const TestApp = () => {
-            const [status, setStatus] = useState('Testing Supabase...');
-            const [connected, setConnected] = useState(false);
+        // Icons
+        const Trophy = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                <path d="M4 22h16"></path>
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+        );
 
+        const Users = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        );
+
+        const Award = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="6"></circle>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+            </svg>
+        );
+
+        const Lock = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        );
+
+        const Unlock = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
+            </svg>
+        );
+
+        const App = () => {
+            const [loading, setLoading] = useState(true);
+            const [isDirector, setIsDirector] = useState(false);
+            const [passwordInput, setPasswordInput] = useState('');
+            const [activeTab, setActiveTab] = useState('championship');
+            const [showPasswordModal, setShowPasswordModal] = useState(false);
+            const [showTeamManagement, setShowTeamManagement] = useState(false);
+            const [editingDivision, setEditingDivision] = useState('championship');
+
+            const initialData = {
+                championship: {
+                    teams: [
+                        { id: 1, name: 'Team Alpha', points: 0, players: ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6'] },
+                        { id: 2, name: 'Team Beta', points: 0, players: ['Player 7', 'Player 8', 'Player 9', 'Player 10', 'Player 11', 'Player 12'] },
+                        { id: 3, name: 'Team Gamma', points: 0, players: ['Player 13', 'Player 14', 'Player 15', 'Player 16', 'Player 17', 'Player 18'] },
+                        { id: 4, name: 'Team Delta', points: 0, players: ['Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'] }
+                    ],
+                    rounds: [
+                        { id: 1, name: 'Round 1', pointValue: 1, matches: [] },
+                        { id: 2, name: 'Round 2', pointValue: 1, matches: [] },
+                        { id: 3, name: 'Round 3', pointValue: 2, matches: [] },
+                        { id: 4, name: 'Round 4', pointValue: 2, matches: [] }
+                    ]
+                },
+                classic: {
+                    teams: [
+                        { id: 1, name: 'Team Classic A', points: 0, players: ['Player A1', 'Player A2', 'Player A3', 'Player A4', 'Player A5', 'Player A6'] },
+                        { id: 2, name: 'Team Classic B', points: 0, players: ['Player B1', 'Player B2', 'Player B3', 'Player B4', 'Player B5', 'Player B6'] }
+                    ],
+                    rounds: [
+                        { id: 1, name: 'Round 1', pointValue: 1, matches: [] },
+                        { id: 2, name: 'Round 2', pointValue: 1, matches: [] },
+                        { id: 3, name: 'Round 3', pointValue: 2, matches: [] },
+                        { id: 4, name: 'Round 4', pointValue: 2, matches: [] }
+                    ]
+                }
+            };
+
+            const [tournamentData, setTournamentData] = useState(initialData);
+
+            // Load from Supabase
             useEffect(() => {
-                // Test Supabase connection
-                const testConnection = async () => {
+                const loadData = async () => {
                     try {
                         const { data, error } = await supabase
                             .from('tournament_data')
                             .select('*')
-                            .limit(1);
-                        
-                        if (error && error.code === '42P01') {
-                            // Table doesn't exist yet - that's OK
-                            setStatus('✅ Supabase Connected! (Table needs to be created)');
-                            setConnected(true);
-                        } else if (error) {
-                            setStatus('⚠️ Error: ' + error.message);
-                        } else {
-                            setStatus('✅ Supabase Connected Successfully!');
-                            setConnected(true);
+                            .eq('id', 1)
+                            .single();
+
+                        if (data && data.data) {
+                            setTournamentData(data.data);
+                        } else if (!error || error.code === 'PGRST116') {
+                            // No data yet, initialize
+                            await supabase
+                                .from('tournament_data')
+                                .insert({ id: 1, data: initialData });
                         }
                     } catch (err) {
-                        setStatus('❌ Connection failed: ' + err.message);
+                        console.error('Load error:', err);
                     }
+                    setLoading(false);
                 };
 
-                testConnection();
+                loadData();
+
+                // Subscribe to real-time changes
+                const channel = supabase
+                    .channel('tournament_changes')
+                    .on('postgres_changes', 
+                        { event: '*', schema: 'public', table: 'tournament_data' }, 
+                        (payload) => {
+                            if (payload.new && payload.new.data) {
+                                setTournamentData(payload.new.data);
+                            }
+                        }
+                    )
+                    .subscribe();
+
+                return () => {
+                    supabase.removeChannel(channel);
+                };
             }, []);
 
+            // Save to Supabase
+            const saveData = async (data) => {
+                try {
+                    await supabase
+                        .from('tournament_data')
+                        .upsert({ id: 1, data: data });
+                } catch (err) {
+                    console.error('Save error:', err);
+                }
+            };
+
+            const updateTeamName = (division, teamId, newName) => {
+                const updated = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        teams: tournamentData[division].teams.map(team =>
+                            team.id === teamId ? { ...team, name: newName } : team
+                        )
+                    }
+                };
+                setTournamentData(updated);
+                saveData(updated);
+            };
+
+            const updatePlayerName = (division, teamId, playerIndex, newName) => {
+                const updated = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        teams: tournamentData[division].teams.map(team =>
+                            team.id === teamId
+                                ? {
+                                    ...team,
+                                    players: team.players.map((player, idx) =>
+                                        idx === playerIndex ? newName : player
+                                    )
+                                }
+                                : team
+                        )
+                    }
+                };
+                setTournamentData(updated);
+                saveData(updated);
+            };
+
+            const addMatch = (division, roundId, team1Id, team2Id) => {
+                const newMatch = {
+                    id: Date.now(),
+                    team1: team1Id,
+                    team2: team2Id,
+                    team1Player1: '',
+                    team1Player2: '',
+                    team2Player1: '',
+                    team2Player2: '',
+                    team1Games: 0,
+                    team2Games: 0,
+                    tiebreakScore: '',
+                    completed: false
+                };
+
+                const updated = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        rounds: tournamentData[division].rounds.map(round =>
+                            round.id === roundId
+                                ? { ...round, matches: [...round.matches, newMatch] }
+                                : round
+                        )
+                    }
+                };
+                setTournamentData(updated);
+                saveData(updated);
+            };
+
+            const updateMatch = (division, roundId, matchId, updates) => {
+                const updated = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        rounds: tournamentData[division].rounds.map(round =>
+                            round.id === roundId
+                                ? {
+                                    ...round,
+                                    matches: round.matches.map(match =>
+                                        match.id === matchId ? { ...match, ...updates } : match
+                                    )
+                                }
+                                : round
+                        )
+                    }
+                };
+                setTournamentData(updated);
+                saveData(updated);
+            };
+
+            const completeMatch = (division, roundId, matchId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                const match = round.matches.find(m => m.id === matchId);
+                
+                if (!match.team1Player1 || !match.team1Player2 || !match.team2Player1 || !match.team2Player2) {
+                    alert('Please select all players');
+                    return;
+                }
+
+                let winner;
+                if (match.team1Games === match.team2Games && match.team1Games === 3) {
+                    if (!match.tiebreakScore || !match.tiebreakScore.includes('-')) {
+                        alert('Please enter tiebreak score (e.g., 7-5)');
+                        return;
+                    }
+                    const tb = match.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                    if (tb.length === 2 && !isNaN(tb[0]) && !isNaN(tb[1])) {
+                        winner = tb[0] > tb[1] ? match.team1 : match.team2;
+                    } else {
+                        alert('Invalid tiebreak format');
+                        return;
+                    }
+                } else {
+                    winner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                }
+
+                const updated = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        teams: tournamentData[division].teams.map(team =>
+                            team.id === winner
+                                ? { ...team, points: team.points + round.pointValue }
+                                : team
+                        ),
+                        rounds: tournamentData[division].rounds.map(r =>
+                            r.id === roundId
+                                ? {
+                                    ...r,
+                                    matches: r.matches.map(m =>
+                                        m.id === matchId ? { ...m, completed: true } : m
+                                    )
+                                }
+                                : r
+                        )
+                    }
+                };
+                setTournamentData(updated);
+                saveData(updated);
+            };
+
+            const deleteMatch = (division, roundId, matchId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                const match = round.matches.find(m => m.id === matchId);
+
+                let updated;
+                if (match.completed) {
+                    let winner;
+                    if (match.team1Games === match.team2Games && match.team1Games === 3) {
+                        const tb = match.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                        winner = tb[0] > tb[1] ? match.team1 : match.team2;
+                    } else {
+                        winner = match.team1Games > match.team2Games ? match.team1 : match.team2;
+                    }
+
+                    updated = {
+                        ...tournamentData,
+                        [division]: {
+                            ...tournamentData[division],
+                            teams: tournamentData[division].teams.map(team =>
+                                team.id === winner
+                                    ? { ...team, points: team.points - round.pointValue }
+                                    : team
+                            ),
+                            rounds: tournamentData[division].rounds.map(r =>
+                                r.id === roundId
+                                    ? { ...r, matches: r.matches.filter(m => m.id !== matchId) }
+                                    : r
+                            )
+                        }
+                    };
+                } else {
+                    updated = {
+                        ...tournamentData,
+                        [division]: {
+                            ...tournamentData[division],
+                            rounds: tournamentData[division].rounds.map(r =>
+                                r.id === roundId
+                                    ? { ...r, matches: r.matches.filter(m => m.id !== matchId) }
+                                    : r
+                            )
+                        }
+                    };
+                }
+                setTournamentData(updated);
+                saveData(updated);
+            };
+
+            const getTeamName = (division, teamId) => {
+                const team = tournamentData[division].teams.find(t => t.id === teamId);
+                return team ? team.name : '';
+            };
+
+            const getTeamPlayers = (division, teamId) => {
+                const team = tournamentData[division].teams.find(t => t.id === teamId);
+                return team ? team.players : [];
+            };
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
+                        <div className="text-yellow-400 text-2xl font-bold">Loading tournament...</div>
+                    </div>
+                );
+            }
+
+            const currentDivision = tournamentData[activeTab];
+            const sortedTeams = [...currentDivision.teams].sort((a, b) => b.points - a.points);
+
             return (
-                <div style={{
-                    minHeight: '100vh',
-                    background: 'linear-gradient(135deg, #1f2937 0%, #374151 50%, #111827 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '20px'
-                }}>
-                    <div style={{
-                        background: 'white',
-                        borderRadius: '12px',
-                        padding: '40px',
-                        maxWidth: '600px',
-                        textAlign: 'center',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-                    }}>
-                        <h1 style={{
-                            fontSize: '32px',
-                            fontWeight: 'bold',
-                            color: connected ? '#10b981' : '#f59e0b',
-                            marginBottom: '20px'
-                        }}>
-                            The G Cup Tournament
-                        </h1>
-                        <p style={{
-                            fontSize: '20px',
-                            color: connected ? '#059669' : '#d97706',
-                            marginBottom: '30px',
-                            fontWeight: '600'
-                        }}>
-                            {status}
-                        </p>
-                        {connected ? (
-                            <div style={{
-                                background: '#d1fae5',
-                                padding: '20px',
-                                borderRadius: '8px',
-                                border: '2px solid #10b981'
-                            }}>
-                                <p style={{ color: '#065f46', fontSize: '18px', marginBottom: '15px' }}>
-                                    <strong>Supabase is working!</strong>
-                                </p>
-                                <p style={{ color: '#065f46', fontSize: '14px' }}>
-                                    Ready to add tournament features with real-time sync!
-                                </p>
+                <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 p-4">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div className="flex items-center gap-3">
+                                    <Trophy className="w-10 h-10 text-yellow-400" />
+                                    <div>
+                                        <h1 className="text-3xl font-bold text-yellow-400">The G Cup Tournament</h1>
+                                        <p className="text-yellow-200 italic">It's a G-Thang • Championship Tennis Competition</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3">
+                                    {isDirector && (
+                                        <button
+                                            onClick={() => setShowTeamManagement(true)}
+                                            className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500 shadow-lg"
+                                        >
+                                            <Users className="w-5 h-5" />
+                                            Manage Teams
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            if (isDirector) {
+                                                setIsDirector(false);
+                                            } else {
+                                                setShowPasswordModal(true);
+                                            }
+                                        }}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow-lg ${
+                                            isDirector
+                                                ? 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-500 hover:to-red-600'
+                                                : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500'
+                                        }`}
+                                    >
+                                        {isDirector ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                                        {isDirector ? 'Logout' : 'Director Login'}
+                                    </button>
+                                </div>
                             </div>
-                        ) : (
-                            <div style={{
-                                background: '#fef3c7',
-                                padding: '20px',
-                                borderRadius: '8px',
-                                border: '2px solid #f59e0b'
-                            }}>
-                                <p style={{ color: '#92400e', fontSize: '14px' }}>
-                                    Testing connection...
-                                </p>
+                        </div>
+
+                        <div className="flex gap-4 mb-6">
+                            <button
+                                onClick={() => setActiveTab('championship')}
+                                className={`flex-1 py-3 px-6 rounded-lg font-semibold shadow-lg ${
+                                    activeTab === 'championship'
+                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 border-2 border-yellow-400'
+                                        : 'bg-gray-800 text-yellow-200 hover:bg-gray-700 border-2 border-gray-600'
+                                }`}
+                            >
+                                <Award className="w-5 h-5 inline mr-2" />
+                                Championship Cup
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('classic')}
+                                className={`flex-1 py-3 px-6 rounded-lg font-semibold shadow-lg ${
+                                    activeTab === 'classic'
+                                        ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 border-2 border-yellow-400'
+                                        : 'bg-gray-800 text-yellow-200 hover:bg-gray-700 border-2 border-gray-600'
+                                }`}
+                            >
+                                <Users className="w-5 h-5 inline mr-2" />
+                                Classic Cup
+                            </button>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
+                            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Standings</h2>
+                            <div className="space-y-3">
+                                {sortedTeams.map((team, index) => (
+                                    <div
+                                        key={team.id}
+                                        className={`p-4 rounded-lg ${
+                                            index === 0 ? 'bg-gradient-to-r from-yellow-600 to-yellow-500 border-2 border-yellow-400' : 'bg-gray-800 border-2 border-gray-600'
+                                        }`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4">
+                                                <span className={`text-2xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>#{index + 1}</span>
+                                                <div>
+                                                    <h3 className={`text-xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>{team.name}</h3>
+                                                    <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>{team.players.join(', ')}</p>
+                                                </div>
+                                            </div>
+                                            <div className={`text-3xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>{team.points} pts</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {showPasswordModal && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                <div className="bg-white rounded-lg p-6 w-96">
+                                    <h3 className="text-xl font-bold mb-4">Tournament Director Login</h3>
+                                    <input
+                                        type="password"
+                                        placeholder="Enter password"
+                                        value={passwordInput}
+                                        onChange={(e) => setPasswordInput(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && (passwordInput === 'director123' ? (setIsDirector(true), setShowPasswordModal(false), setPasswordInput('')) : alert('Incorrect password'))}
+                                        className="w-full px-4 py-2 border rounded mb-4"
+                                    />
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => passwordInput === 'director123' ? (setIsDirector(true), setShowPasswordModal(false), setPasswordInput('')) : alert('Incorrect password')}
+                                            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                        >
+                                            Login
+                                        </button>
+                                        <button
+                                            onClick={() => (setShowPasswordModal(false), setPasswordInput(''))}
+                                            className="flex-1 px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <p className="text-sm text-gray-600 mt-4">Password: director123</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {showTeamManagement && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between mb-6 sticky top-0 bg-white pb-4 border-b">
+                                        <h3 className="text-2xl font-bold">Team Management</h3>
+                                        <button
+                                            onClick={() => setShowTeamManagement(false)}
+                                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-4 mb-6">
+                                        <button
+                                            onClick={() => setEditingDivision('championship')}
+                                            className={`flex-1 py-2 px-4 rounded-lg font-semibold ${
+                                                editingDivision === 'championship' ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            Championship Cup
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingDivision('classic')}
+                                            className={`flex-1 py-2 px-4 rounded-lg font-semibold ${
+                                                editingDivision === 'classic' ? 'bg-green-600 text-white' : 'bg-gray-200'
+                                            }`}
+                                        >
+                                            Classic Cup
+                                        </button>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {tournamentData[editingDivision].teams.map((team) => (
+                                            <div key={team.id} className="border-2 rounded-lg p-4">
+                                                <div className="mb-4">
+                                                    <label className="block text-sm font-semibold mb-2">Team Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={team.name}
+                                                        onChange={(e) => updateTeamName(editingDivision, team.id, e.target.value)}
+                                                        className="w-full px-4 py-2 border-2 border-blue-300 rounded-lg text-lg font-bold"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-semibold mb-2">Players</label>
+                                                    <div className="space-y-2">
+                                                        {team.players.map((player, idx) => (
+                                                            <div key={idx} className="flex items-center gap-2">
+                                                                <span className="w-8">#{idx + 1}</span>
+                                                                <input
+                                                                    type="text"
+                                                                    value={player}
+                                                                    onChange={(e) => updatePlayerName(editingDivision, team.id, idx, e.target.value)}
+                                                                    className="flex-1 px-3 py-2 border rounded"
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                                        <p className="text-sm text-blue-800">
+                                            <strong>🔥 Real-time Sync:</strong> Changes save automatically to Supabase!
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
@@ -124,7 +568,7 @@
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<TestApp />);
+        root.render(<App />);
     </script>
 </body>
 </html>
