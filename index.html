@@ -35,16 +35,45 @@
             const [activeTab, setActiveTab] = useState('championship');
             const [showPasswordModal, setShowPasswordModal] = useState(false);
             const [showTeamManagement, setShowTeamManagement] = useState(false);
+            const [showCheckIn, setShowCheckIn] = useState(false);
             const [editingDivision, setEditingDivision] = useState('championship');
             const [loading, setLoading] = useState(true);
 
             const initialData = {
                 championship: {
                     teams: [
-                        { id: 1, name: 'Team Alpha', points: 0, players: ['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5', 'Player 6'] },
-                        { id: 2, name: 'Team Beta', points: 0, players: ['Player 7', 'Player 8', 'Player 9', 'Player 10', 'Player 11', 'Player 12'] },
-                        { id: 3, name: 'Team Gamma', points: 0, players: ['Player 13', 'Player 14', 'Player 15', 'Player 16', 'Player 17', 'Player 18'] },
-                        { id: 4, name: 'Team Delta', points: 0, players: ['Player 19', 'Player 20', 'Player 21', 'Player 22', 'Player 23', 'Player 24'] }
+                        { id: 1, name: 'Team Alpha', points: 0, players: [
+                            { name: 'Player 1', checkedIn: false },
+                            { name: 'Player 2', checkedIn: false },
+                            { name: 'Player 3', checkedIn: false },
+                            { name: 'Player 4', checkedIn: false },
+                            { name: 'Player 5', checkedIn: false },
+                            { name: 'Player 6', checkedIn: false }
+                        ]},
+                        { id: 2, name: 'Team Beta', points: 0, players: [
+                            { name: 'Player 7', checkedIn: false },
+                            { name: 'Player 8', checkedIn: false },
+                            { name: 'Player 9', checkedIn: false },
+                            { name: 'Player 10', checkedIn: false },
+                            { name: 'Player 11', checkedIn: false },
+                            { name: 'Player 12', checkedIn: false }
+                        ]},
+                        { id: 3, name: 'Team Gamma', points: 0, players: [
+                            { name: 'Player 13', checkedIn: false },
+                            { name: 'Player 14', checkedIn: false },
+                            { name: 'Player 15', checkedIn: false },
+                            { name: 'Player 16', checkedIn: false },
+                            { name: 'Player 17', checkedIn: false },
+                            { name: 'Player 18', checkedIn: false }
+                        ]},
+                        { id: 4, name: 'Team Delta', points: 0, players: [
+                            { name: 'Player 19', checkedIn: false },
+                            { name: 'Player 20', checkedIn: false },
+                            { name: 'Player 21', checkedIn: false },
+                            { name: 'Player 22', checkedIn: false },
+                            { name: 'Player 23', checkedIn: false },
+                            { name: 'Player 24', checkedIn: false }
+                        ]}
                     ],
                     rounds: [
                         { id: 1, name: 'Round 1', pointValue: 1, matches: [] },
@@ -55,8 +84,22 @@
                 },
                 classic: {
                     teams: [
-                        { id: 1, name: 'Team Classic A', points: 0, players: ['Player A1', 'Player A2', 'Player A3', 'Player A4', 'Player A5', 'Player A6'] },
-                        { id: 2, name: 'Team Classic B', points: 0, players: ['Player B1', 'Player B2', 'Player B3', 'Player B4', 'Player B5', 'Player B6'] }
+                        { id: 1, name: 'Team Classic A', points: 0, players: [
+                            { name: 'Player A1', checkedIn: false },
+                            { name: 'Player A2', checkedIn: false },
+                            { name: 'Player A3', checkedIn: false },
+                            { name: 'Player A4', checkedIn: false },
+                            { name: 'Player A5', checkedIn: false },
+                            { name: 'Player A6', checkedIn: false }
+                        ]},
+                        { id: 2, name: 'Team Classic B', points: 0, players: [
+                            { name: 'Player B1', checkedIn: false },
+                            { name: 'Player B2', checkedIn: false },
+                            { name: 'Player B3', checkedIn: false },
+                            { name: 'Player B4', checkedIn: false },
+                            { name: 'Player B5', checkedIn: false },
+                            { name: 'Player B6', checkedIn: false }
+                        ]}
                     ],
                     rounds: [
                         { id: 1, name: 'Round 1', pointValue: 1, matches: [] },
@@ -131,7 +174,25 @@
                         teams: tournamentData[division].teams.map(team =>
                             team.id === teamId ? {
                                 ...team,
-                                players: team.players.map((p, idx) => idx === playerIndex ? newName : p)
+                                players: team.players.map((p, idx) => idx === playerIndex ? { ...p, name: newName } : p)
+                            } : team
+                        )
+                    }
+                };
+                publishData(updated);
+            };
+
+            const toggleCheckIn = (division, teamId, playerIndex) => {
+                const updated = {
+                    ...tournamentData,
+                    [division]: {
+                        ...tournamentData[division],
+                        teams: tournamentData[division].teams.map(team =>
+                            team.id === teamId ? {
+                                ...team,
+                                players: team.players.map((p, idx) => 
+                                    idx === playerIndex ? { ...p, checkedIn: !p.checkedIn } : p
+                                )
                             } : team
                         )
                     }
@@ -303,9 +364,14 @@
                                 </div>
                                 <div className="flex gap-3">
                                     {isDirector && (
-                                        <button onClick={() => setShowTeamManagement(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500 shadow-lg">
-                                            <Users className="w-5 h-5" />Manage Teams
-                                        </button>
+                                        <>
+                                            <button onClick={() => setShowCheckIn(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-400 hover:to-green-500 shadow-lg">
+                                                ✓ Check-In
+                                            </button>
+                                            <button onClick={() => setShowTeamManagement(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900 hover:from-yellow-400 hover:to-yellow-500 shadow-lg">
+                                                <Users className="w-5 h-5" />Manage Teams
+                                            </button>
+                                        </>
                                     )}
                                     <button onClick={() => isDirector ? setIsDirector(false) : setShowPasswordModal(true)} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold shadow-lg ${isDirector ? 'bg-gradient-to-r from-red-600 to-red-700 text-white' : 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-gray-900'}`}>
                                         {isDirector ? <Unlock className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
@@ -334,7 +400,15 @@
                                                 <span className={`text-2xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>#{index + 1}</span>
                                                 <div>
                                                     <h3 className={`text-xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>{team.name}</h3>
-                                                    <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>{team.players.join(', ')}</p>
+                                                    <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>
+                                                        {team.players.map((p, i) => (
+                                                            <span key={i}>
+                                                                {p.name}
+                                                                {p.checkedIn && <span className="text-green-500">✓</span>}
+                                                                {i < team.players.length - 1 ? ', ' : ''}
+                                                            </span>
+                                                        ))}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className={`text-3xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-400'}`}>{team.points} pts</div>
@@ -384,11 +458,11 @@
                                                             <div className="space-y-2 mb-2">
                                                                 <select value={match.team1Player1} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player1: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 1</option>
-                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => <option key={i} value={p}>{p}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
                                                                 </select>
                                                                 <select value={match.team1Player2} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player2: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 2</option>
-                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => <option key={i} value={p}>{p}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
                                                                 </select>
                                                             </div>
                                                         ) : (
@@ -406,11 +480,11 @@
                                                             <div className="space-y-2 mb-2">
                                                                 <select value={match.team2Player1} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player1: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 1</option>
-                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => <option key={i} value={p}>{p}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
                                                                 </select>
                                                                 <select value={match.team2Player2} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player2: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 2</option>
-                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => <option key={i} value={p}>{p}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
                                                                 </select>
                                                             </div>
                                                         ) : (
@@ -488,7 +562,7 @@
                                                         {team.players.map((player, idx) => (
                                                             <div key={idx} className="flex items-center gap-2">
                                                                 <span className="w-8">#{idx + 1}</span>
-                                                                <input type="text" value={player} onChange={(e) => updatePlayerName(editingDivision, team.id, idx, e.target.value)} className="flex-1 px-3 py-2 border rounded" />
+                                                                <input type="text" value={player.name} onChange={(e) => updatePlayerName(editingDivision, team.id, idx, e.target.value)} className="flex-1 px-3 py-2 border rounded" />
                                                             </div>
                                                         ))}
                                                     </div>
@@ -498,6 +572,50 @@
                                     </div>
                                     <div className="mt-6 p-4 bg-green-50 rounded-lg">
                                         <p className="text-sm text-green-800"><strong>🔥 Real-Time:</strong> Changes sync instantly via PubNub!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {showCheckIn && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                                    <div className="flex items-center justify-between mb-6 sticky top-0 bg-white pb-4 border-b">
+                                        <h3 className="text-2xl font-bold">Player Check-In</h3>
+                                        <button onClick={() => setShowCheckIn(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+                                    </div>
+                                    <div className="flex gap-4 mb-6">
+                                        <button onClick={() => setEditingDivision('championship')} className={`flex-1 py-2 px-4 rounded-lg font-semibold ${editingDivision === 'championship' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}>Championship</button>
+                                        <button onClick={() => setEditingDivision('classic')} className={`flex-1 py-2 px-4 rounded-lg font-semibold ${editingDivision === 'classic' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}>Classic</button>
+                                    </div>
+                                    <div className="space-y-6">
+                                        {tournamentData[editingDivision].teams.map(team => (
+                                            <div key={team.id} className="border-2 rounded-lg p-4">
+                                                <h4 className="text-lg font-bold mb-3 text-blue-600">{team.name}</h4>
+                                                <div className="space-y-2">
+                                                    {team.players.map((player, idx) => (
+                                                        <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                                                            <input 
+                                                                type="checkbox" 
+                                                                checked={player.checkedIn}
+                                                                onChange={() => toggleCheckIn(editingDivision, team.id, idx)}
+                                                                className="w-5 h-5 cursor-pointer"
+                                                            />
+                                                            <span className={`flex-1 text-lg ${player.checkedIn ? 'text-green-600 font-semibold' : 'text-gray-700'}`}>
+                                                                {player.name}
+                                                                {player.checkedIn && <span className="ml-2">✓</span>}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="mt-3 pt-3 border-t text-sm text-gray-600">
+                                                    Checked in: {team.players.filter(p => p.checkedIn).length} / {team.players.length}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                                        <p className="text-sm text-green-800"><strong>✓ Real-Time:</strong> Check-in status syncs instantly across all devices!</p>
                                     </div>
                                 </div>
                             </div>
