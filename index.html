@@ -174,7 +174,17 @@
                         teams: tournamentData[division].teams.map(team =>
                             team.id === teamId ? {
                                 ...team,
-                                players: team.players.map((p, idx) => idx === playerIndex ? { ...p, name: newName } : p)
+                                players: team.players.map((p, idx) => {
+                                    if (idx === playerIndex) {
+                                        // If it's a string, convert to object
+                                        if (typeof p === 'string') {
+                                            return { name: newName, checkedIn: false };
+                                        }
+                                        // If it's already an object, just update the name
+                                        return { ...p, name: newName };
+                                    }
+                                    return p;
+                                })
                             } : team
                         )
                     }
@@ -190,9 +200,17 @@
                         teams: tournamentData[division].teams.map(team =>
                             team.id === teamId ? {
                                 ...team,
-                                players: team.players.map((p, idx) => 
-                                    idx === playerIndex ? { ...p, checkedIn: !p.checkedIn } : p
-                                )
+                                players: team.players.map((p, idx) => {
+                                    if (idx === playerIndex) {
+                                        // If it's a string, convert to object
+                                        if (typeof p === 'string') {
+                                            return { name: p, checkedIn: true };
+                                        }
+                                        // If it's already an object, toggle checkedIn
+                                        return { ...p, checkedIn: !p.checkedIn };
+                                    }
+                                    return p;
+                                })
                             } : team
                         )
                     }
@@ -401,13 +419,17 @@
                                                 <div>
                                                     <h3 className={`text-xl font-bold ${index === 0 ? 'text-gray-900' : 'text-yellow-200'}`}>{team.name}</h3>
                                                     <p className={`text-sm ${index === 0 ? 'text-gray-800' : 'text-gray-400'}`}>
-                                                        {team.players.map((p, i) => (
-                                                            <span key={i}>
-                                                                {p.name}
-                                                                {p.checkedIn && <span className="text-green-500">✓</span>}
-                                                                {i < team.players.length - 1 ? ', ' : ''}
-                                                            </span>
-                                                        ))}
+                                                        {team.players.map((p, i) => {
+                                                            const playerName = typeof p === 'string' ? p : p.name;
+                                                            const isCheckedIn = typeof p === 'object' ? p.checkedIn : false;
+                                                            return (
+                                                                <span key={i}>
+                                                                    {playerName}
+                                                                    {isCheckedIn && <span className="text-green-500">✓</span>}
+                                                                    {i < team.players.length - 1 ? ', ' : ''}
+                                                                </span>
+                                                            );
+                                                        })}
                                                     </p>
                                                 </div>
                                             </div>
@@ -458,11 +480,19 @@
                                                             <div className="space-y-2 mb-2">
                                                                 <select value={match.team1Player1} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player1: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 1</option>
-                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => {
+                                                                        const playerName = typeof p === 'string' ? p : p.name;
+                                                                        const isCheckedIn = typeof p === 'object' ? p.checkedIn : false;
+                                                                        return <option key={i} value={playerName}>{playerName}{isCheckedIn && ' ✓'}</option>;
+                                                                    })}
                                                                 </select>
                                                                 <select value={match.team1Player2} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player2: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 2</option>
-                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team1).map((p, i) => {
+                                                                        const playerName = typeof p === 'string' ? p : p.name;
+                                                                        const isCheckedIn = typeof p === 'object' ? p.checkedIn : false;
+                                                                        return <option key={i} value={playerName}>{playerName}{isCheckedIn && ' ✓'}</option>;
+                                                                    })}
                                                                 </select>
                                                             </div>
                                                         ) : (
@@ -480,11 +510,19 @@
                                                             <div className="space-y-2 mb-2">
                                                                 <select value={match.team2Player1} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player1: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 1</option>
-                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => {
+                                                                        const playerName = typeof p === 'string' ? p : p.name;
+                                                                        const isCheckedIn = typeof p === 'object' ? p.checkedIn : false;
+                                                                        return <option key={i} value={playerName}>{playerName}{isCheckedIn && ' ✓'}</option>;
+                                                                    })}
                                                                 </select>
                                                                 <select value={match.team2Player2} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player2: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
                                                                     <option value="">Select Player 2</option>
-                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => <option key={i} value={p.name}>{p.name}{p.checkedIn && ' ✓'}</option>)}
+                                                                    {getTeamPlayers(activeTab, match.team2).map((p, i) => {
+                                                                        const playerName = typeof p === 'string' ? p : p.name;
+                                                                        const isCheckedIn = typeof p === 'object' ? p.checkedIn : false;
+                                                                        return <option key={i} value={playerName}>{playerName}{isCheckedIn && ' ✓'}</option>;
+                                                                    })}
                                                                 </select>
                                                             </div>
                                                         ) : (
@@ -559,12 +597,15 @@
                                                 <div>
                                                     <label className="block text-sm font-semibold mb-2">Players</label>
                                                     <div className="space-y-2">
-                                                        {team.players.map((player, idx) => (
-                                                            <div key={idx} className="flex items-center gap-2">
-                                                                <span className="w-8">#{idx + 1}</span>
-                                                                <input type="text" value={player.name} onChange={(e) => updatePlayerName(editingDivision, team.id, idx, e.target.value)} className="flex-1 px-3 py-2 border rounded" />
-                                                            </div>
-                                                        ))}
+                                                        {team.players.map((player, idx) => {
+                                                            const playerName = typeof player === 'string' ? player : player.name;
+                                                            return (
+                                                                <div key={idx} className="flex items-center gap-2">
+                                                                    <span className="w-8">#{idx + 1}</span>
+                                                                    <input type="text" value={playerName} onChange={(e) => updatePlayerName(editingDivision, team.id, idx, e.target.value)} className="flex-1 px-3 py-2 border rounded" />
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             </div>
@@ -593,23 +634,27 @@
                                             <div key={team.id} className="border-2 rounded-lg p-4">
                                                 <h4 className="text-lg font-bold mb-3 text-blue-600">{team.name}</h4>
                                                 <div className="space-y-2">
-                                                    {team.players.map((player, idx) => (
-                                                        <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
-                                                            <input 
-                                                                type="checkbox" 
-                                                                checked={player.checkedIn}
-                                                                onChange={() => toggleCheckIn(editingDivision, team.id, idx)}
-                                                                className="w-5 h-5 cursor-pointer"
-                                                            />
-                                                            <span className={`flex-1 text-lg ${player.checkedIn ? 'text-green-600 font-semibold' : 'text-gray-700'}`}>
-                                                                {player.name}
-                                                                {player.checkedIn && <span className="ml-2">✓</span>}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                                    {team.players.map((player, idx) => {
+                                                        const playerName = typeof player === 'string' ? player : player.name;
+                                                        const isCheckedIn = typeof player === 'object' ? player.checkedIn : false;
+                                                        return (
+                                                            <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                                                                <input 
+                                                                    type="checkbox" 
+                                                                    checked={isCheckedIn}
+                                                                    onChange={() => toggleCheckIn(editingDivision, team.id, idx)}
+                                                                    className="w-5 h-5 cursor-pointer"
+                                                                />
+                                                                <span className={`flex-1 text-lg ${isCheckedIn ? 'text-green-600 font-semibold' : 'text-gray-700'}`}>
+                                                                    {playerName}
+                                                                    {isCheckedIn && <span className="ml-2">✓</span>}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
                                                 <div className="mt-3 pt-3 border-t text-sm text-gray-600">
-                                                    Checked in: {team.players.filter(p => p.checkedIn).length} / {team.players.length}
+                                                    Checked in: {team.players.filter(p => typeof p === 'object' && p.checkedIn).length} / {team.players.length}
                                                 </div>
                                             </div>
                                         ))}
