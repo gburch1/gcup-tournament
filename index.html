@@ -392,16 +392,6 @@
                 return 'notStarted';
             };
 
-            const matchExists = (division, roundId, team1Id, team2Id) => {
-                const round = tournamentData[division].rounds.find(r => r.id === roundId);
-                if (!round) return false;
-                
-                return round.matches.some(match => 
-                    (match.team1 === team1Id && match.team2 === team2Id) ||
-                    (match.team1 === team2Id && match.team2 === team1Id)
-                );
-            };
-
             if (loading) {
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
