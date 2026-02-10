@@ -38,6 +38,7 @@
             const [showCheckIn, setShowCheckIn] = useState(false);
             const [editingDivision, setEditingDivision] = useState('championship');
             const [loading, setLoading] = useState(true);
+            const [hideCompletedMatches, setHideCompletedMatches] = useState({});
 
             const initialData = {
                 championship: {
@@ -492,6 +493,17 @@
                                                 <span className="text-gray-400 font-semibold">
                                                     ⏳ {round.matches.filter(m => !m.completed && m.team1Games === 0 && m.team2Games === 0).length} Not Started
                                                 </span>
+                                                <span className="text-yellow-400 font-semibold ml-2 px-2 py-1 bg-gray-700 rounded">
+                                                    📊 {round.matches.filter(m => !m.completed).length} Remaining
+                                                </span>
+                                                {round.matches.filter(m => m.completed).length > 0 && isDirector && (
+                                                    <button
+                                                        onClick={() => setHideCompletedMatches(prev => ({ ...prev, [round.id]: !prev[round.id] }))}
+                                                        className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-500"
+                                                    >
+                                                        {hideCompletedMatches[round.id] ? '👁️ Show' : '🙈 Hide'} Completed
+                                                    </button>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -527,6 +539,12 @@
                                                 const aStatus = a.completed ? 2 : (a.team1Games > 0 || a.team2Games > 0) ? 0 : 1;
                                                 const bStatus = b.completed ? 2 : (b.team1Games > 0 || b.team2Games > 0) ? 0 : 1;
                                                 return aStatus - bStatus;
+                                            })
+                                            .filter(match => {
+                                                if (hideCompletedMatches[round.id] && match.completed) {
+                                                    return false;
+                                                }
+                                                return true;
                                             })
                                             .map(match => {
                                                 const isInProgress = !match.completed && (match.team1Games > 0 || match.team2Games > 0);
