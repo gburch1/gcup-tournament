@@ -22,7 +22,7 @@
             userId: 'user-' + Math.random().toString(36).substr(2, 9)
         };
 
-        const CHANNEL = 'gcup-tournament';
+        const CHANNEL = 'gcup-tournament-3pairs-test';
         const DIRECTOR_PASSWORD = 'director123';
 
         function TournamentApp() {
@@ -39,10 +39,10 @@
             const [tournamentData, setTournamentData] = useState({
                 championship: {
                     teams: [
-                        { id: 1, name: 'Team 1', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
-                        { id: 2, name: 'Team 2', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
-                        { id: 3, name: 'Team 3', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
-                        { id: 4, name: 'Team 4', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] }
+                        { id: 1, name: 'Team Alpha', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                        { id: 2, name: 'Team Beta', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                        { id: 3, name: 'Team Gamma', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                        { id: 4, name: 'Team Delta', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] }
                     ],
                     rounds: [
                         { id: 1, name: 'Round 1', pointValue: 1, matchups: [] },
@@ -53,8 +53,8 @@
                 },
                 classic: {
                     teams: [
-                        { id: 1, name: 'Team A', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
-                        { id: 2, name: 'Team B', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] }
+                        { id: 1, name: 'Team Epsilon', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                        { id: 2, name: 'Team Zeta', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] }
                     ],
                     rounds: [
                         { id: 1, name: 'Round 1', pointValue: 1, matchups: [] },
@@ -119,12 +119,12 @@
                     id: Date.now(),
                     team1: team1Id,
                     team2: team2Id,
-                    lines: [
-                        { lineNumber: 1, team1Player1: '', team1Player2: '', team2Player1: '', team2Player2: '', team1Games: 0, team2Games: 0, tiebreakScore: '', completed: false },
-                        { lineNumber: 2, team1Player1: '', team1Player2: '', team2Player1: '', team2Player2: '', team1Games: 0, team2Games: 0, tiebreakScore: '', completed: false },
-                        { lineNumber: 3, team1Player1: '', team1Player2: '', team2Player1: '', team2Player2: '', team1Games: 0, team2Games: 0, tiebreakScore: '', completed: false }
+                    pairs: [
+                        { pairNumber: 1, team1Player1: '', team1Player2: '', team2Player1: '', team2Player2: '', team1Games: 0, team2Games: 0, tiebreakScore: '', completed: false },
+                        { pairNumber: 2, team1Player1: '', team1Player2: '', team2Player1: '', team2Player2: '', team1Games: 0, team2Games: 0, tiebreakScore: '', completed: false },
+                        { pairNumber: 3, team1Player1: '', team1Player2: '', team2Player1: '', team2Player2: '', team1Games: 0, team2Games: 0, tiebreakScore: '', completed: false }
                     ],
-                    allLinesComplete: false
+                    allPairsComplete: false
                 };
                 
                 round.matchups.push(newMatchup);
@@ -132,40 +132,40 @@
                 publishData(newData);
             };
 
-            const updateLine = (division, roundId, matchupId, lineNumber, updates) => {
+            const updatePair = (division, roundId, matchupId, pairNumber, updates) => {
                 const newData = { ...tournamentData };
                 const round = newData[division].rounds.find(r => r.id === roundId);
                 const matchup = round.matchups.find(m => m.id === matchupId);
-                const line = matchup.lines.find(l => l.lineNumber === lineNumber);
+                const pair = matchup.pairs.find(l => l.pairNumber === pairNumber);
                 
-                Object.assign(line, updates);
+                Object.assign(pair, updates);
                 
                 setTournamentData(newData);
                 publishData(newData);
             };
 
-            const completeLine = (division, roundId, matchupId, lineNumber) => {
+            const completePair = (division, roundId, matchupId, pairNumber) => {
                 const newData = { ...tournamentData };
                 const round = newData[division].rounds.find(r => r.id === roundId);
                 const matchup = round.matchups.find(m => m.id === matchupId);
-                const line = matchup.lines.find(l => l.lineNumber === lineNumber);
+                const pair = matchup.pairs.find(l => l.pairNumber === pairNumber);
                 
-                line.completed = true;
+                pair.completed = true;
                 
-                // Check if all lines are complete
-                if (matchup.lines.every(l => l.completed)) {
-                    matchup.allLinesComplete = true;
+                // Check if all pairs are complete
+                if (matchup.pairs.every(l => l.completed)) {
+                    matchup.allPairsComplete = true;
                     
-                    // Award points - count wins per team across all 3 lines
+                    // Award points - count wins per team across all 3 pairs
                     let team1Wins = 0;
                     let team2Wins = 0;
                     
-                    matchup.lines.forEach(l => {
+                    matchup.pairs.forEach(l => {
                         if (l.team1Games > l.team2Games) team1Wins++;
                         else if (l.team2Games > l.team1Games) team2Wins++;
                     });
                     
-                    // Award points to the team that won more lines
+                    // Award points to the team that won more pairs
                     if (team1Wins > team2Wins) {
                         const team1 = newData[division].teams.find(t => t.id === matchup.team1);
                         team1.points += round.pointValue;
@@ -184,12 +184,12 @@
                 const round = newData[division].rounds.find(r => r.id === roundId);
                 const matchup = round.matchups.find(m => m.id === matchupId);
                 
-                if (matchup.allLinesComplete) {
+                if (matchup.allPairsComplete) {
                     // Reverse points
                     let team1Wins = 0;
                     let team2Wins = 0;
                     
-                    matchup.lines.forEach(l => {
+                    matchup.pairs.forEach(l => {
                         if (l.team1Games > l.team2Games) team1Wins++;
                         else if (l.team2Games > l.team1Games) team2Wins++;
                     });
@@ -282,7 +282,7 @@
                 
                 const busyTeams = new Set();
                 round.matchups.forEach(matchup => {
-                    if (!matchup.allLinesComplete) {
+                    if (!matchup.allPairsComplete) {
                         busyTeams.add(matchup.team1);
                         busyTeams.add(matchup.team2);
                     }
@@ -506,10 +506,15 @@
 
                         {/* Rounds */}
                         {currentDivision.rounds.map(round => {
-                            const completedMatchups = round.matchups.filter(m => m.allLinesComplete).length;
-                            const inProgressMatchups = round.matchups.filter(m => !m.allLinesComplete && m.lines.some(l => l.team1Games > 0 || l.team2Games > 0)).length;
-                            const notStartedMatchups = round.matchups.filter(m => !m.allLinesComplete && m.lines.every(l => l.team1Games === 0 && l.team2Games === 0)).length;
-                            const remainingMatchups = round.matchups.filter(m => !m.allLinesComplete).length;
+                            // Count total pairs across all matchups
+                            const allPairs = round.matchups.flatMap(m => m.pairs);
+                            const completedPairs = allPairs.filter(p => p.completed).length;
+                            const inProgressPairs = allPairs.filter(p => !p.completed && (p.team1Games > 0 || p.team2Games > 0)).length;
+                            const notStartedPairs = allPairs.filter(p => !p.completed && p.team1Games === 0 && p.team2Games === 0).length;
+                            const remainingPairs = allPairs.filter(p => !p.completed).length;
+                            
+                            // Also track completed matchups for hide/show button
+                            const completedMatchups = round.matchups.filter(m => m.allPairsComplete).length;
                             
                             return (
                                 <div key={round.id} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
@@ -520,16 +525,16 @@
                                             {round.matchups.length > 0 && (
                                                 <div className="mt-2 flex items-center gap-4 text-sm flex-wrap">
                                                     <span className="text-green-400 font-semibold">
-                                                        ✓ {completedMatchups} Complete
+                                                        ✓ {completedPairs} Complete
                                                     </span>
                                                     <span className="text-orange-400 font-semibold">
-                                                        🎾 {inProgressMatchups} In Progress
+                                                        🎾 {inProgressPairs} In Progress
                                                     </span>
                                                     <span className="text-gray-400 font-semibold">
-                                                        ⏳ {notStartedMatchups} Not Started
+                                                        ⏳ {notStartedPairs} Not Started
                                                     </span>
                                                     <span className="text-yellow-400 font-semibold ml-2 px-2 py-1 bg-gray-700 rounded">
-                                                        📊 {remainingMatchups} Remaining
+                                                        📊 {remainingPairs} Remaining
                                                     </span>
                                                     {completedMatchups > 0 && isDirector && (
                                                         <button
@@ -571,26 +576,26 @@
                                         ) : (
                                             [...round.matchups]
                                                 .sort((a, b) => {
-                                                    const aStatus = a.allLinesComplete ? 2 : (a.lines.some(l => l.team1Games > 0 || l.team2Games > 0) ? 0 : 1);
-                                                    const bStatus = b.allLinesComplete ? 2 : (b.lines.some(l => l.team1Games > 0 || l.team2Games > 0) ? 0 : 1);
+                                                    const aStatus = a.allPairsComplete ? 2 : (a.pairs.some(l => l.team1Games > 0 || l.team2Games > 0) ? 0 : 1);
+                                                    const bStatus = b.allPairsComplete ? 2 : (b.pairs.some(l => l.team1Games > 0 || l.team2Games > 0) ? 0 : 1);
                                                     return aStatus - bStatus;
                                                 })
                                                 .filter(matchup => {
-                                                    if (hideCompletedMatchups[round.id] && matchup.allLinesComplete) {
+                                                    if (hideCompletedMatchups[round.id] && matchup.allPairsComplete) {
                                                         return false;
                                                     }
                                                     return true;
                                                 })
                                                 .map(matchup => {
-                                                    const isInProgress = !matchup.allLinesComplete && matchup.lines.some(l => l.team1Games > 0 || l.team2Games > 0);
-                                                    const isNotStarted = !matchup.allLinesComplete && matchup.lines.every(l => l.team1Games === 0 && l.team2Games === 0);
-                                                    const borderColor = matchup.allLinesComplete ? 'border-green-500' : isInProgress ? 'border-orange-500' : 'border-gray-600';
-                                                    const completedLines = matchup.lines.filter(l => l.completed).length;
+                                                    const isInProgress = !matchup.allPairsComplete && matchup.pairs.some(l => l.team1Games > 0 || l.team2Games > 0);
+                                                    const isNotStarted = !matchup.allPairsComplete && matchup.pairs.every(l => l.team1Games === 0 && l.team2Games === 0);
+                                                    const borderColor = matchup.allPairsComplete ? 'border-green-500' : isInProgress ? 'border-orange-500' : 'border-gray-600';
+                                                    const completedPairs = matchup.pairs.filter(l => l.completed).length;
                                                     
                                                     // Count wins for each team
                                                     let team1Wins = 0;
                                                     let team2Wins = 0;
-                                                    matchup.lines.forEach(l => {
+                                                    matchup.pairs.forEach(l => {
                                                         if (l.completed) {
                                                             if (l.team1Games > l.team2Games) team1Wins++;
                                                             else if (l.team2Games > l.team1Games) team2Wins++;
@@ -606,25 +611,25 @@
                                                                         {getTeamName(activeTab, matchup.team1)} vs {getTeamName(activeTab, matchup.team2)}
                                                                     </h3>
                                                                     <div className="flex gap-4 mt-2">
-                                                                        {matchup.allLinesComplete && (
-                                                                            <span className="inline-block px-3 py-1 bg-green-600 text-white text-xs font-bold rounded">
+                                                                        {matchup.allPairsComplete && (
+                                                                            <span className="inpair-block px-3 py-1 bg-green-600 text-white text-xs font-bold rounded">
                                                                                 ✓ COMPLETED
                                                                             </span>
                                                                         )}
                                                                         {isInProgress && (
-                                                                            <span className="inline-block px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded">
+                                                                            <span className="inpair-block px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded">
                                                                                 🎾 IN PROGRESS
                                                                             </span>
                                                                         )}
                                                                         {isNotStarted && (
-                                                                            <span className="inline-block px-3 py-1 bg-gray-600 text-gray-200 text-xs font-bold rounded">
+                                                                            <span className="inpair-block px-3 py-1 bg-gray-600 text-gray-200 text-xs font-bold rounded">
                                                                                 ⏳ NOT STARTED
                                                                             </span>
                                                                         )}
                                                                         <span className="text-sm text-gray-400">
-                                                                            Lines Complete: {completedLines} / 3
+                                                                            Pairs Complete: {completedPairs} / 3
                                                                         </span>
-                                                                        {completedLines > 0 && (
+                                                                        {completedPairs > 0 && (
                                                                             <span className="text-sm font-bold text-yellow-400">
                                                                                 Score: {team1Wins} - {team2Wins}
                                                                             </span>
@@ -641,29 +646,23 @@
                                                                 )}
                                                             </div>
 
-                                                            {/* Lines */}
+                                                            {/* Pairs */}
                                                             <div className="space-y-4">
-                                                                {matchup.lines.map((line, lineIdx) => {
-                                                                    const hasScore = line.team1Games > 0 || line.team2Games > 0;
-                                                                    const isLocked = hasScore;
+                                                                {matchup.pairs.map((pair, pairIdx) => {
+                                                                    const hasScore = pair.team1Games > 0 || pair.team2Games > 0;
                                                                     
                                                                     return (
-                                                                        <div key={line.lineNumber} className={`border-2 rounded-lg p-4 ${line.completed ? 'bg-gray-700 border-green-500' : 'bg-gray-800 border-gray-600'}`}>
-                                                                            {isLocked && !line.completed && (
-                                                                                <div className="mb-3 p-2 bg-orange-900 border border-orange-500 rounded text-orange-200 text-sm">
-                                                                                    🔒 Players locked - Complete this line to unlock
-                                                                                </div>
-                                                                            )}
+                                                                        <div key={pair.pairNumber} className={`border-2 rounded-lg p-4 ${pair.completed ? 'bg-gray-700 border-green-500' : 'bg-gray-800 border-gray-600'}`}>
                                                                             
                                                                             <h4 className="text-lg font-bold text-yellow-300 mb-3">
-                                                                                Line {line.lineNumber}
-                                                                                {line.completed && <span className="ml-2 text-green-400">✓</span>}
+                                                                                Pair {pair.pairNumber}
+                                                                                {pair.completed && <span className="ml-2 text-green-400">✓</span>}
                                                                             </h4>
                                                                             
-                                                                            {(hasScore || line.completed) && (
+                                                                            {(hasScore || pair.completed) && (
                                                                                 <div className="text-center mb-4 pb-4 border-b-2 border-gray-600">
-                                                                                    <p className="text-5xl font-bold text-yellow-400">{line.team1Games} - {line.team2Games}</p>
-                                                                                    {line.tiebreakScore && <p className="text-xl font-semibold text-red-400 mt-2">TB: {line.tiebreakScore}</p>}
+                                                                                    <p className="text-5xl font-bold text-yellow-400">{pair.team1Games} - {pair.team2Games}</p>
+                                                                                    {pair.tiebreakScore && <p className="text-xl font-semibold text-red-400 mt-2">TB: {pair.tiebreakScore}</p>}
                                                                                 </div>
                                                                             )}
                                                                             
@@ -671,13 +670,12 @@
                                                                                 {/* Team 1 */}
                                                                                 <div>
                                                                                     <h5 className="font-bold text-lg text-yellow-400 mb-2">{getTeamName(activeTab, matchup.team1)}</h5>
-                                                                                    {isDirector && !line.completed ? (
+                                                                                    {isDirector && !pair.completed ? (
                                                                                         <div className="space-y-2 mb-2">
                                                                                             <select 
-                                                                                                value={line.team1Player1} 
-                                                                                                onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { team1Player1: e.target.value })}
-                                                                                                disabled={isLocked}
-                                                                                                className={`w-full px-3 py-2 border rounded ${isLocked ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
+                                                                                                value={pair.team1Player1} 
+                                                                                                onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { team1Player1: e.target.value })}
+                                                                                                className="w-full px-3 py-2 border rounded bg-gray-700 text-yellow-200">
                                                                                                 <option value="">Select Player 1</option>
                                                                                                 {getTeamPlayers(activeTab, matchup.team1).map((p, i) => {
                                                                                                     const playerName = typeof p === 'string' ? p : p.name;
@@ -686,10 +684,10 @@
                                                                                                 })}
                                                                                             </select>
                                                                                             <select 
-                                                                                                value={line.team1Player2} 
-                                                                                                onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { team1Player2: e.target.value })}
-                                                                                                disabled={isLocked}
-                                                                                                className={`w-full px-3 py-2 border rounded ${isLocked ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
+                                                                                                value={pair.team1Player2} 
+                                                                                                onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { team1Player2: e.target.value })}
+                                                                                                
+                                                                                                className="w-full px-3 py-2 border rounded bg-gray-700 text-yellow-200">
                                                                                                 <option value="">Select Player 2</option>
                                                                                                 {getTeamPlayers(activeTab, matchup.team1).map((p, i) => {
                                                                                                     const playerName = typeof p === 'string' ? p : p.name;
@@ -699,32 +697,32 @@
                                                                                             </select>
                                                                                         </div>
                                                                                     ) : (
-                                                                                        <p className="text-yellow-200 mb-2">{line.team1Player1} & {line.team1Player2}</p>
+                                                                                        <p className="text-yellow-200 mb-2">{pair.team1Player1} & {pair.team1Player2}</p>
                                                                                     )}
-                                                                                    {isDirector && !line.completed ? (
+                                                                                    {isDirector && !pair.completed ? (
                                                                                         <input 
                                                                                             type="number" 
                                                                                             min="0" 
                                                                                             max="4" 
-                                                                                            value={line.team1Games} 
-                                                                                            onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { team1Games: parseInt(e.target.value) || 0 })}
+                                                                                            value={pair.team1Games} 
+                                                                                            onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { team1Games: parseInt(e.target.value) || 0 })}
                                                                                             className="w-24 px-3 py-2 border bg-gray-700 text-yellow-400 rounded text-center text-2xl font-bold" 
                                                                                         />
                                                                                     ) : (
-                                                                                        <p className="text-4xl font-bold text-yellow-400">{line.team1Games}</p>
+                                                                                        <p className="text-4xl font-bold text-yellow-400">{pair.team1Games}</p>
                                                                                     )}
                                                                                 </div>
                                                                                 
                                                                                 {/* Team 2 */}
                                                                                 <div>
                                                                                     <h5 className="font-bold text-lg text-yellow-400 mb-2">{getTeamName(activeTab, matchup.team2)}</h5>
-                                                                                    {isDirector && !line.completed ? (
+                                                                                    {isDirector && !pair.completed ? (
                                                                                         <div className="space-y-2 mb-2">
                                                                                             <select 
-                                                                                                value={line.team2Player1} 
-                                                                                                onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { team2Player1: e.target.value })}
-                                                                                                disabled={isLocked}
-                                                                                                className={`w-full px-3 py-2 border rounded ${isLocked ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
+                                                                                                value={pair.team2Player1} 
+                                                                                                onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { team2Player1: e.target.value })}
+                                                                                                
+                                                                                                className="w-full px-3 py-2 border rounded bg-gray-700 text-yellow-200">
                                                                                                 <option value="">Select Player 1</option>
                                                                                                 {getTeamPlayers(activeTab, matchup.team2).map((p, i) => {
                                                                                                     const playerName = typeof p === 'string' ? p : p.name;
@@ -733,10 +731,10 @@
                                                                                                 })}
                                                                                             </select>
                                                                                             <select 
-                                                                                                value={line.team2Player2} 
-                                                                                                onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { team2Player2: e.target.value })}
-                                                                                                disabled={isLocked}
-                                                                                                className={`w-full px-3 py-2 border rounded ${isLocked ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
+                                                                                                value={pair.team2Player2} 
+                                                                                                onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { team2Player2: e.target.value })}
+                                                                                                
+                                                                                                className="w-full px-3 py-2 border rounded bg-gray-700 text-yellow-200">
                                                                                                 <option value="">Select Player 2</option>
                                                                                                 {getTeamPlayers(activeTab, matchup.team2).map((p, i) => {
                                                                                                     const playerName = typeof p === 'string' ? p : p.name;
@@ -746,44 +744,44 @@
                                                                                             </select>
                                                                                         </div>
                                                                                     ) : (
-                                                                                        <p className="text-yellow-200 mb-2">{line.team2Player1} & {line.team2Player2}</p>
+                                                                                        <p className="text-yellow-200 mb-2">{pair.team2Player1} & {pair.team2Player2}</p>
                                                                                     )}
-                                                                                    {isDirector && !line.completed ? (
+                                                                                    {isDirector && !pair.completed ? (
                                                                                         <input 
                                                                                             type="number" 
                                                                                             min="0" 
                                                                                             max="4" 
-                                                                                            value={line.team2Games} 
-                                                                                            onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { team2Games: parseInt(e.target.value) || 0 })}
+                                                                                            value={pair.team2Games} 
+                                                                                            onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { team2Games: parseInt(e.target.value) || 0 })}
                                                                                             className="w-24 px-3 py-2 border bg-gray-700 text-yellow-400 rounded text-center text-2xl font-bold" 
                                                                                         />
                                                                                     ) : (
-                                                                                        <p className="text-4xl font-bold text-yellow-400">{line.team2Games}</p>
+                                                                                        <p className="text-4xl font-bold text-yellow-400">{pair.team2Games}</p>
                                                                                     )}
                                                                                 </div>
                                                                             </div>
                                                                             
                                                                             {/* Tiebreak */}
-                                                                            {isDirector && !line.completed && line.team1Games === 3 && line.team2Games === 3 && (
+                                                                            {isDirector && !pair.completed && pair.team1Games === 3 && pair.team2Games === 3 && (
                                                                                 <div className="mt-3">
                                                                                     <label className="block text-yellow-400 text-sm font-bold mb-2">Tiebreak Score</label>
                                                                                     <input
                                                                                         type="text"
-                                                                                        value={line.tiebreakScore}
-                                                                                        onChange={(e) => updateLine(activeTab, round.id, matchup.id, line.lineNumber, { tiebreakScore: e.target.value })}
+                                                                                        value={pair.tiebreakScore}
+                                                                                        onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { tiebreakScore: e.target.value })}
                                                                                         placeholder="e.g., 7-5"
                                                                                         className="px-3 py-2 border bg-gray-700 text-yellow-200 rounded"
                                                                                     />
                                                                                 </div>
                                                                             )}
                                                                             
-                                                                            {/* Complete Line Button */}
-                                                                            {isDirector && !line.completed && (line.team1Games > 0 || line.team2Games > 0) && (
+                                                                            {/* Complete Pair Button */}
+                                                                            {isDirector && !pair.completed && (pair.team1Games > 0 || pair.team2Games > 0) && (
                                                                                 <button
-                                                                                    onClick={() => completeLine(activeTab, round.id, matchup.id, line.lineNumber)}
+                                                                                    onClick={() => completePair(activeTab, round.id, matchup.id, pair.pairNumber)}
                                                                                     className="mt-3 w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded"
                                                                                 >
-                                                                                    Complete Line {line.lineNumber}
+                                                                                    Complete Pair {pair.pairNumber}
                                                                                 </button>
                                                                             )}
                                                                         </div>
