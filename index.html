@@ -38,6 +38,7 @@
             const [showCheckIn, setShowCheckIn] = useState(false);
             const [editingDivision, setEditingDivision] = useState('championship');
             const [loading, setLoading] = useState(true);
+            const [hideCompletedMatches, setHideCompletedMatches] = useState({});
 
             const initialData = {
                 championship: {
@@ -356,6 +357,51 @@
                 return team ? team.players : [];
             };
 
+            const getTeamsInIncompleteMatches = (division, roundId) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                if (!round) return [];
+                
+                const busyTeams = new Set();
+                round.matches.forEach(match => {
+                    if (!match.completed) {
+                        busyTeams.add(match.team1);
+                        busyTeams.add(match.team2);
+                    }
+                });
+                return Array.from(busyTeams);
+            };
+
+            const isTeamAvailable = (division, roundId, teamId) => {
+                const busyTeams = getTeamsInIncompleteMatches(division, roundId);
+                return !busyTeams.includes(teamId);
+            };
+
+            const matchExists = (division, roundId, team1Id, team2Id) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                if (!round) return false;
+                
+                return round.matches.some(match => 
+                    (match.team1 === team1Id && match.team2 === team2Id) ||
+                    (match.team1 === team2Id && match.team2 === team1Id)
+                );
+            };
+
+            const getMatchStatus = (match) => {
+                if (match.completed) return 'completed';
+                if (match.team1Games > 0 || match.team2Games > 0) return 'inProgress';
+                return 'notStarted';
+            };
+
+            const matchExists = (division, roundId, team1Id, team2Id) => {
+                const round = tournamentData[division].rounds.find(r => r.id === roundId);
+                if (!round) return false;
+                
+                return round.matches.some(match => 
+                    (match.team1 === team1Id && match.team2 === team2Id) ||
+                    (match.team1 === team2Id && match.team2 === team1Id)
+                );
+            };
+
             if (loading) {
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
@@ -446,6 +492,27 @@
                                     <div>
                                         <h2 className="text-2xl font-bold text-yellow-400">{round.name}</h2>
                                         <p className="text-yellow-200">Point Value: {round.pointValue} {round.pointValue === 1 ? 'point' : 'points'}</p>
+                                        {round.matches.length > 0 && (
+                                            <div className="mt-2 flex items-center gap-4 text-sm flex-wrap">
+                                                <span className="text-green-400 font-semibold">
+                                                    ✓ {round.matches.filter(m => m.completed).length} Complete
+                                                </span>
+                                                <span className="text-orange-400 font-semibold">
+                                                    🎾 {round.matches.filter(m => !m.completed && (m.team1Games > 0 || m.team2Games > 0)).length} In Progress
+                                                </span>
+                                                <span className="text-gray-400 font-semibold">
+                                                    ⏳ {round.matches.filter(m => !m.completed && m.team1Games === 0 && m.team2Games === 0).length} Not Started
+                                                </span>
+                                                {round.matches.filter(m => m.completed).length > 0 && isDirector && (
+                                                    <button
+                                                        onClick={() => setHideCompletedMatches(prev => ({ ...prev, [round.id]: !prev[round.id] }))}
+                                                        className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300"
+                                                    >
+                                                        {hideCompletedMatches[round.id] ? '👁️ Show' : '🙈 Hide'} Completed
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     {isDirector && (
                                         <select onChange={(e) => {
@@ -453,11 +520,19 @@
                                             if (teams.length === 2) addMatch(activeTab, round.id, parseInt(teams[0]), parseInt(teams[1]));
                                         }} className="px-4 py-2 border-2 border-yellow-500 bg-gray-800 text-yellow-200 rounded-lg font-semibold" value="">
                                             <option value="">+ Add Match</option>
-                                            {currentDivision.teams.map(team1 =>
-                                                currentDivision.teams.filter(team2 => team2.id !== team1.id).map(team2 => (
-                                                    <option key={`${team1.id}-${team2.id}`} value={`${team1.id}-${team2.id}`}>{team1.name} vs {team2.name}</option>
-                                                ))
-                                            )}
+                                            {currentDivision.teams
+                                                .filter(team1 => isTeamAvailable(activeTab, round.id, team1.id))
+                                                .map(team1 =>
+                                                    currentDivision.teams
+                                                        .filter(team2 => 
+                                                            team2.id !== team1.id && 
+                                                            isTeamAvailable(activeTab, round.id, team2.id) &&
+                                                            !matchExists(activeTab, round.id, team1.id, team2.id)
+                                                        )
+                                                        .map(team2 => (
+                                                            <option key={`${team1.id}-${team2.id}`} value={`${team1.id}-${team2.id}`}>{team1.name} vs {team2.name}</option>
+                                                        ))
+                                                )}
                                         </select>
                                     )}
                                 </div>
@@ -465,8 +540,42 @@
                                     {round.matches.length === 0 ? (
                                         <p className="text-gray-400 text-center py-8">No matches scheduled</p>
                                     ) : (
-                                        round.matches.map(match => (
-                                            <div key={match.id} className={`border-2 rounded-lg p-4 ${match.completed ? 'bg-gray-700 border-green-500' : 'bg-gray-800 border-gray-600'}`}>
+                                        [...round.matches]
+                                            .sort((a, b) => {
+                                                // Sort order: In Progress > Not Started > Completed
+                                                const aStatus = a.completed ? 2 : (a.team1Games > 0 || a.team2Games > 0) ? 0 : 1;
+                                                const bStatus = b.completed ? 2 : (b.team1Games > 0 || b.team2Games > 0) ? 0 : 1;
+                                                return aStatus - bStatus;
+                                            })
+                                            .filter(match => !hideCompletedMatches[round.id] || !match.completed)
+                                            .map(match => {
+                                                const isInProgress = !match.completed && (match.team1Games > 0 || match.team2Games > 0);
+                                                const isNotStarted = !match.completed && match.team1Games === 0 && match.team2Games === 0;
+                                                const borderColor = match.completed ? 'border-green-500' : isInProgress ? 'border-orange-500' : 'border-gray-600';
+                                                const bgColor = match.completed ? 'bg-gray-700' : isInProgress ? 'bg-gray-800' : 'bg-gray-800';
+                                                
+                                                return (
+                                            <div key={match.id} className={`border-2 rounded-lg p-4 ${bgColor} ${borderColor}`}>
+                                                {isInProgress && (
+                                                    <div className="mb-2 inline-block px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded">
+                                                        🎾 IN PROGRESS
+                                                    </div>
+                                                )}
+                                                {isNotStarted && (
+                                                    <div className="mb-2 inline-block px-3 py-1 bg-gray-600 text-gray-200 text-xs font-bold rounded">
+                                                        ⏳ NOT STARTED
+                                                    </div>
+                                                )}
+                                                {match.completed && (
+                                                    <div className="mb-2 inline-block px-3 py-1 bg-green-600 text-white text-xs font-bold rounded">
+                                                        ✓ COMPLETED
+                                                    </div>
+                                                )}
+                                                {(match.team1Games > 0 || match.team2Games > 0) && !match.completed && (
+                                                    <div className="mb-3 p-2 bg-orange-900 border border-orange-500 rounded text-orange-200 text-sm">
+                                                        🔒 Players locked - Complete this match before starting another
+                                                    </div>
+                                                )}
                                                 {(match.team1Games > 0 || match.team2Games > 0 || match.completed) && (
                                                     <div className="text-center mb-4 pb-4 border-b-2 border-gray-600">
                                                         <p className="text-5xl font-bold text-yellow-400">{match.team1Games} - {match.team2Games}</p>
@@ -478,7 +587,11 @@
                                                         <h3 className="font-bold text-lg text-yellow-400 mb-2">{getTeamName(activeTab, match.team1)}</h3>
                                                         {isDirector && !match.completed ? (
                                                             <div className="space-y-2 mb-2">
-                                                                <select value={match.team1Player1} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player1: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
+                                                                <select 
+                                                                    value={match.team1Player1} 
+                                                                    onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player1: e.target.value })} 
+                                                                    disabled={match.team1Games > 0 || match.team2Games > 0}
+                                                                    className={`w-full px-3 py-2 border rounded ${match.team1Games > 0 || match.team2Games > 0 ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
                                                                     <option value="">Select Player 1</option>
                                                                     {getTeamPlayers(activeTab, match.team1).map((p, i) => {
                                                                         const playerName = typeof p === 'string' ? p : p.name;
@@ -486,7 +599,11 @@
                                                                         return <option key={i} value={playerName}>{playerName}{isCheckedIn && ' ✓'}</option>;
                                                                     })}
                                                                 </select>
-                                                                <select value={match.team1Player2} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player2: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
+                                                                <select 
+                                                                    value={match.team1Player2} 
+                                                                    onChange={(e) => updateMatch(activeTab, round.id, match.id, { team1Player2: e.target.value })} 
+                                                                    disabled={match.team1Games > 0 || match.team2Games > 0}
+                                                                    className={`w-full px-3 py-2 border rounded ${match.team1Games > 0 || match.team2Games > 0 ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
                                                                     <option value="">Select Player 2</option>
                                                                     {getTeamPlayers(activeTab, match.team1).map((p, i) => {
                                                                         const playerName = typeof p === 'string' ? p : p.name;
@@ -508,7 +625,11 @@
                                                         <h3 className="font-bold text-lg text-yellow-400 mb-2">{getTeamName(activeTab, match.team2)}</h3>
                                                         {isDirector && !match.completed ? (
                                                             <div className="space-y-2 mb-2">
-                                                                <select value={match.team2Player1} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player1: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
+                                                                <select 
+                                                                    value={match.team2Player1} 
+                                                                    onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player1: e.target.value })} 
+                                                                    disabled={match.team1Games > 0 || match.team2Games > 0}
+                                                                    className={`w-full px-3 py-2 border rounded ${match.team1Games > 0 || match.team2Games > 0 ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
                                                                     <option value="">Select Player 1</option>
                                                                     {getTeamPlayers(activeTab, match.team2).map((p, i) => {
                                                                         const playerName = typeof p === 'string' ? p : p.name;
@@ -516,7 +637,11 @@
                                                                         return <option key={i} value={playerName}>{playerName}{isCheckedIn && ' ✓'}</option>;
                                                                     })}
                                                                 </select>
-                                                                <select value={match.team2Player2} onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player2: e.target.value })} className="w-full px-3 py-2 border bg-gray-700 text-yellow-200 rounded">
+                                                                <select 
+                                                                    value={match.team2Player2} 
+                                                                    onChange={(e) => updateMatch(activeTab, round.id, match.id, { team2Player2: e.target.value })} 
+                                                                    disabled={match.team1Games > 0 || match.team2Games > 0}
+                                                                    className={`w-full px-3 py-2 border rounded ${match.team1Games > 0 || match.team2Games > 0 ? 'bg-gray-600 text-gray-300 cursor-not-allowed' : 'bg-gray-700 text-yellow-200'}`}>
                                                                     <option value="">Select Player 2</option>
                                                                     {getTeamPlayers(activeTab, match.team2).map((p, i) => {
                                                                         const playerName = typeof p === 'string' ? p : p.name;
@@ -556,7 +681,8 @@
                                                     </div>
                                                 )}
                                             </div>
-                                        ))
+                                                );
+                                            })
                                     )}
                                 </div>
                             </div>
