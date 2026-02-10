@@ -152,27 +152,18 @@
                 
                 pair.completed = true;
                 
+                // Award points immediately for this pair win
+                if (pair.team1Games > pair.team2Games) {
+                    const team1 = newData[division].teams.find(t => t.id === matchup.team1);
+                    team1.points += round.pointValue;
+                } else if (pair.team2Games > pair.team1Games) {
+                    const team2 = newData[division].teams.find(t => t.id === matchup.team2);
+                    team2.points += round.pointValue;
+                }
+                
                 // Check if all pairs are complete
                 if (matchup.pairs.every(l => l.completed)) {
                     matchup.allPairsComplete = true;
-                    
-                    // Award points - count wins per team across all 3 pairs
-                    let team1Wins = 0;
-                    let team2Wins = 0;
-                    
-                    matchup.pairs.forEach(l => {
-                        if (l.team1Games > l.team2Games) team1Wins++;
-                        else if (l.team2Games > l.team1Games) team2Wins++;
-                    });
-                    
-                    // Award points to the team that won more pairs
-                    if (team1Wins > team2Wins) {
-                        const team1 = newData[division].teams.find(t => t.id === matchup.team1);
-                        team1.points += round.pointValue;
-                    } else if (team2Wins > team1Wins) {
-                        const team2 = newData[division].teams.find(t => t.id === matchup.team2);
-                        team2.points += round.pointValue;
-                    }
                 }
                 
                 setTournamentData(newData);
@@ -184,24 +175,18 @@
                 const round = newData[division].rounds.find(r => r.id === roundId);
                 const matchup = round.matchups.find(m => m.id === matchupId);
                 
-                if (matchup.allPairsComplete) {
-                    // Reverse points
-                    let team1Wins = 0;
-                    let team2Wins = 0;
-                    
-                    matchup.pairs.forEach(l => {
-                        if (l.team1Games > l.team2Games) team1Wins++;
-                        else if (l.team2Games > l.team1Games) team2Wins++;
-                    });
-                    
-                    if (team1Wins > team2Wins) {
-                        const team1 = newData[division].teams.find(t => t.id === matchup.team1);
-                        team1.points -= round.pointValue;
-                    } else if (team2Wins > team1Wins) {
-                        const team2 = newData[division].teams.find(t => t.id === matchup.team2);
-                        team2.points -= round.pointValue;
+                // Reverse points for each completed pair
+                matchup.pairs.forEach(pair => {
+                    if (pair.completed) {
+                        if (pair.team1Games > pair.team2Games) {
+                            const team1 = newData[division].teams.find(t => t.id === matchup.team1);
+                            team1.points -= round.pointValue;
+                        } else if (pair.team2Games > pair.team1Games) {
+                            const team2 = newData[division].teams.find(t => t.id === matchup.team2);
+                            team2.points -= round.pointValue;
+                        }
                     }
-                }
+                });
                 
                 round.matchups = round.matchups.filter(m => m.id !== matchupId);
                 setTournamentData(newData);
