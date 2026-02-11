@@ -152,11 +152,31 @@
                 
                 pair.completed = true;
                 
-                // Award points immediately for this pair win
+                // Determine winner - check tiebreak if games are tied
+                let team1Wins = false;
+                let team2Wins = false;
+                
                 if (pair.team1Games > pair.team2Games) {
+                    team1Wins = true;
+                } else if (pair.team2Games > pair.team1Games) {
+                    team2Wins = true;
+                } else if (pair.team1Games === pair.team2Games && pair.tiebreakScore) {
+                    // Games are tied, check tiebreak (format: "7-5" or "5-7")
+                    const tbParts = pair.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                    if (tbParts.length === 2 && !isNaN(tbParts[0]) && !isNaN(tbParts[1])) {
+                        if (tbParts[0] > tbParts[1]) {
+                            team1Wins = true;
+                        } else if (tbParts[1] > tbParts[0]) {
+                            team2Wins = true;
+                        }
+                    }
+                }
+                
+                // Award points to the winner
+                if (team1Wins) {
                     const team1 = newData[division].teams.find(t => t.id === matchup.team1);
                     team1.points += round.pointValue;
-                } else if (pair.team2Games > pair.team1Games) {
+                } else if (team2Wins) {
                     const team2 = newData[division].teams.find(t => t.id === matchup.team2);
                     team2.points += round.pointValue;
                 }
@@ -170,6 +190,52 @@
                 publishData(newData);
             };
 
+            const uncomplatePair = (division, roundId, matchupId, pairNumber) => {
+                const newData = { ...tournamentData };
+                const round = newData[division].rounds.find(r => r.id === roundId);
+                const matchup = round.matchups.find(m => m.id === matchupId);
+                const pair = matchup.pairs.find(l => l.pairNumber === pairNumber);
+                
+                // Only uncomplete if it was completed
+                if (!pair.completed) return;
+                
+                // Determine winner to reverse points
+                let team1Wins = false;
+                let team2Wins = false;
+                
+                if (pair.team1Games > pair.team2Games) {
+                    team1Wins = true;
+                } else if (pair.team2Games > pair.team1Games) {
+                    team2Wins = true;
+                } else if (pair.team1Games === pair.team2Games && pair.tiebreakScore) {
+                    // Games are tied, check tiebreak
+                    const tbParts = pair.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                    if (tbParts.length === 2 && !isNaN(tbParts[0]) && !isNaN(tbParts[1])) {
+                        if (tbParts[0] > tbParts[1]) {
+                            team1Wins = true;
+                        } else if (tbParts[1] > tbParts[0]) {
+                            team2Wins = true;
+                        }
+                    }
+                }
+                
+                // Reverse the points
+                if (team1Wins) {
+                    const team1 = newData[division].teams.find(t => t.id === matchup.team1);
+                    team1.points -= round.pointValue;
+                } else if (team2Wins) {
+                    const team2 = newData[division].teams.find(t => t.id === matchup.team2);
+                    team2.points -= round.pointValue;
+                }
+                
+                // Mark as not completed
+                pair.completed = false;
+                matchup.allPairsComplete = false;
+                
+                setTournamentData(newData);
+                publishData(newData);
+            };
+
             const deleteMatchup = (division, roundId, matchupId) => {
                 const newData = { ...tournamentData };
                 const round = newData[division].rounds.find(r => r.id === roundId);
@@ -178,10 +244,31 @@
                 // Reverse points for each completed pair
                 matchup.pairs.forEach(pair => {
                     if (pair.completed) {
+                        // Determine winner - check tiebreak if games are tied
+                        let team1Wins = false;
+                        let team2Wins = false;
+                        
                         if (pair.team1Games > pair.team2Games) {
+                            team1Wins = true;
+                        } else if (pair.team2Games > pair.team1Games) {
+                            team2Wins = true;
+                        } else if (pair.team1Games === pair.team2Games && pair.tiebreakScore) {
+                            // Games are tied, check tiebreak
+                            const tbParts = pair.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                            if (tbParts.length === 2 && !isNaN(tbParts[0]) && !isNaN(tbParts[1])) {
+                                if (tbParts[0] > tbParts[1]) {
+                                    team1Wins = true;
+                                } else if (tbParts[1] > tbParts[0]) {
+                                    team2Wins = true;
+                                }
+                            }
+                        }
+                        
+                        // Reverse the points
+                        if (team1Wins) {
                             const team1 = newData[division].teams.find(t => t.id === matchup.team1);
                             team1.points -= round.pointValue;
-                        } else if (pair.team2Games > pair.team1Games) {
+                        } else if (team2Wins) {
                             const team2 = newData[division].teams.find(t => t.id === matchup.team2);
                             team2.points -= round.pointValue;
                         }
@@ -760,14 +847,26 @@
                                                                                 </div>
                                                                             )}
                                                                             
-                                                                            {/* Complete Pair Button */}
-                                                                            {isDirector && !pair.completed && (pair.team1Games > 0 || pair.team2Games > 0) && (
-                                                                                <button
-                                                                                    onClick={() => completePair(activeTab, round.id, matchup.id, pair.pairNumber)}
-                                                                                    className="mt-3 w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded"
-                                                                                >
-                                                                                    Complete Pair {pair.pairNumber}
-                                                                                </button>
+                                                                            {/* Complete/Edit Pair Buttons */}
+                                                                            {isDirector && (
+                                                                                <div className="mt-3 flex gap-2">
+                                                                                    {!pair.completed && (pair.team1Games > 0 || pair.team2Games > 0) && (
+                                                                                        <button
+                                                                                            onClick={() => completePair(activeTab, round.id, matchup.id, pair.pairNumber)}
+                                                                                            className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded"
+                                                                                        >
+                                                                                            Complete Pair {pair.pairNumber}
+                                                                                        </button>
+                                                                                    )}
+                                                                                    {pair.completed && (
+                                                                                        <button
+                                                                                            onClick={() => uncomplatePair(activeTab, round.id, matchup.id, pair.pairNumber)}
+                                                                                            className="flex-1 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded"
+                                                                                        >
+                                                                                            ✏️ Edit Pair {pair.pairNumber}
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
                                                                             )}
                                                                         </div>
                                                                     );
