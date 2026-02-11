@@ -851,11 +851,9 @@
                                                                             </div>
                                                                             
                                                                             {/* Tiebreak */}
-                                                                            {isDirector && !pair.completed && (
+                                                                            {isDirector && !pair.completed && pair.team1Games === 3 && pair.team2Games === 3 && (
                                                                                 <div className="mt-3">
-                                                                                    <label className="block text-yellow-400 text-sm font-bold mb-2">
-                                                                                        Tiebreak Score {pair.team1Games === 3 && pair.team2Games === 3 && '(Required for 3-3)'}
-                                                                                    </label>
+                                                                                    <label className="block text-yellow-400 text-sm font-bold mb-2">Tiebreak Score (Required)</label>
                                                                                     <input
                                                                                         type="text"
                                                                                         value={pair.tiebreakScore}
