@@ -150,6 +150,13 @@
                 const matchup = round.matchups.find(m => m.id === matchupId);
                 const pair = matchup.pairs.find(l => l.pairNumber === pairNumber);
                 
+                console.log('Completing pair:', {
+                    team1Games: pair.team1Games,
+                    team2Games: pair.team2Games,
+                    tiebreakScore: pair.tiebreakScore,
+                    gamesEqual: pair.team1Games === pair.team2Games
+                });
+                
                 pair.completed = true;
                 
                 // Determine winner - check tiebreak if games are tied
@@ -158,27 +165,37 @@
                 
                 if (pair.team1Games > pair.team2Games) {
                     team1Wins = true;
+                    console.log('Team 1 wins by games');
                 } else if (pair.team2Games > pair.team1Games) {
                     team2Wins = true;
+                    console.log('Team 2 wins by games');
                 } else if (pair.team1Games === pair.team2Games && pair.tiebreakScore) {
                     // Games are tied, check tiebreak (format: "7-5" or "5-7")
+                    console.log('Games tied, checking tiebreak:', pair.tiebreakScore);
                     const tbParts = pair.tiebreakScore.split('-').map(s => parseInt(s.trim()));
+                    console.log('Tiebreak parts:', tbParts);
                     if (tbParts.length === 2 && !isNaN(tbParts[0]) && !isNaN(tbParts[1])) {
                         if (tbParts[0] > tbParts[1]) {
                             team1Wins = true;
+                            console.log('Team 1 wins by tiebreak');
                         } else if (tbParts[1] > tbParts[0]) {
                             team2Wins = true;
+                            console.log('Team 2 wins by tiebreak');
                         }
                     }
                 }
+                
+                console.log('Final result:', { team1Wins, team2Wins, pointValue: round.pointValue });
                 
                 // Award points to the winner
                 if (team1Wins) {
                     const team1 = newData[division].teams.find(t => t.id === matchup.team1);
                     team1.points += round.pointValue;
+                    console.log('Awarded', round.pointValue, 'points to', team1.name);
                 } else if (team2Wins) {
                     const team2 = newData[division].teams.find(t => t.id === matchup.team2);
                     team2.points += round.pointValue;
+                    console.log('Awarded', round.pointValue, 'points to', team2.name);
                 }
                 
                 // Check if all pairs are complete
@@ -834,15 +851,17 @@
                                                                             </div>
                                                                             
                                                                             {/* Tiebreak */}
-                                                                            {isDirector && !pair.completed && pair.team1Games === 3 && pair.team2Games === 3 && (
+                                                                            {isDirector && !pair.completed && (
                                                                                 <div className="mt-3">
-                                                                                    <label className="block text-yellow-400 text-sm font-bold mb-2">Tiebreak Score</label>
+                                                                                    <label className="block text-yellow-400 text-sm font-bold mb-2">
+                                                                                        Tiebreak Score {pair.team1Games === 3 && pair.team2Games === 3 && '(Required for 3-3)'}
+                                                                                    </label>
                                                                                     <input
                                                                                         type="text"
                                                                                         value={pair.tiebreakScore}
                                                                                         onChange={(e) => updatePair(activeTab, round.id, matchup.id, pair.pairNumber, { tiebreakScore: e.target.value })}
-                                                                                        placeholder="e.g., 7-5"
-                                                                                        className="px-3 py-2 border bg-gray-700 text-yellow-200 rounded"
+                                                                                        placeholder="e.g., 7-5 or 5-7"
+                                                                                        className="px-3 py-2 border bg-gray-700 text-yellow-200 rounded w-32"
                                                                                     />
                                                                                 </div>
                                                                             )}
