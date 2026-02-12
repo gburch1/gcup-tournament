@@ -727,24 +727,26 @@
                                                                         {getTeamName(activeTab, matchup.team1)} vs {getTeamName(activeTab, matchup.team2)}
                                                                     </h3>
                                                                     <div className="flex gap-4 mt-2">
-                                                                        {matchup.allPairsComplete && (
+                                                                        {isDirector && matchup.allPairsComplete && (
                                                                             <span className="inpair-block px-3 py-1 bg-green-600 text-white text-xs font-bold rounded">
                                                                                 ✓ COMPLETED
                                                                             </span>
                                                                         )}
-                                                                        {isInProgress && (
+                                                                        {isDirector && isInProgress && (
                                                                             <span className="inpair-block px-3 py-1 bg-orange-600 text-white text-xs font-bold rounded">
                                                                                 🎾 IN PROGRESS
                                                                             </span>
                                                                         )}
-                                                                        {isNotStarted && (
+                                                                        {isDirector && isNotStarted && (
                                                                             <span className="inpair-block px-3 py-1 bg-gray-600 text-gray-200 text-xs font-bold rounded">
                                                                                 ⏳ NOT STARTED
                                                                             </span>
                                                                         )}
-                                                                        <span className="text-sm text-gray-400">
-                                                                            Pairs Complete: {completedPairs} / 3
-                                                                        </span>
+                                                                        {isDirector && (
+                                                                            <span className="text-sm text-gray-400">
+                                                                                Pairs Complete: {completedPairs} / 3
+                                                                            </span>
+                                                                        )}
                                                                         {completedPairs > 0 && (
                                                                             <span className="text-sm font-bold text-yellow-400">
                                                                                 Score: {team1Wins} - {team2Wins}
