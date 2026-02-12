@@ -608,49 +608,49 @@
                             
                             return (
                                 <div key={round.id} className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-2xl p-6 mb-6 border-2 border-yellow-500">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div>
+                                    <div className="mb-4">
+                                        <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-3">
                                                 <h2 className="text-2xl font-bold text-yellow-400">{round.name}</h2>
                                                 {isDirector && round.matchups.length > 0 && (
                                                     <span className="text-lg font-semibold text-yellow-300">
-                                                        ({completedPairs}/6 pairs complete)
+                                                        ({completedPairs}/6 matches complete)
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="text-yellow-200">Point Value: {round.pointValue} {round.pointValue === 1 ? 'point' : 'points'}</p>
                                             {isDirector && round.matchups.length > 0 && completedMatchups > 0 && (
-                                                <div className="mt-2">
-                                                    <button
-                                                        onClick={() => setHideCompletedMatchups(prev => ({ ...prev, [round.id]: !prev[round.id] }))}
-                                                        className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-500"
-                                                    >
-                                                        {hideCompletedMatchups[round.id] ? '👁️ Show' : '🙈 Hide'} Completed
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    onClick={() => setHideCompletedMatchups(prev => ({ ...prev, [round.id]: !prev[round.id] }))}
+                                                    className="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 border border-gray-500"
+                                                >
+                                                    {hideCompletedMatchups[round.id] ? '👁️ Show' : '🙈 Hide'} Completed
+                                                </button>
                                             )}
                                         </div>
-                                        {isDirector && (
-                                            <select onChange={(e) => {
-                                                const teams = e.target.value.split('-');
-                                                if (teams.length === 2) addTeamMatchup(activeTab, round.id, parseInt(teams[0]), parseInt(teams[1]));
-                                            }} className="px-4 py-2 border-2 border-yellow-500 bg-gray-800 text-yellow-200 rounded-lg font-semibold" value="">
-                                                <option value="">+ Add Team Matchup</option>
-                                                {currentDivision.teams
-                                                    .filter(team1 => isTeamAvailable(activeTab, round.id, team1.id))
-                                                    .map(team1 =>
-                                                        currentDivision.teams
-                                                            .filter(team2 => 
-                                                                team2.id !== team1.id && 
-                                                                isTeamAvailable(activeTab, round.id, team2.id) &&
-                                                                !matchupExists(activeTab, round.id, team1.id, team2.id)
-                                                            )
-                                                            .map(team2 => (
-                                                                <option key={`${team1.id}-${team2.id}`} value={`${team1.id}-${team2.id}`}>{team1.name} vs {team2.name}</option>
-                                                            ))
-                                                    )}
-                                            </select>
-                                        )}
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-yellow-200">Point Value: {round.pointValue} {round.pointValue === 1 ? 'point' : 'points'}</p>
+                                            {isDirector && (
+                                                <select onChange={(e) => {
+                                                    const teams = e.target.value.split('-');
+                                                    if (teams.length === 2) addTeamMatchup(activeTab, round.id, parseInt(teams[0]), parseInt(teams[1]));
+                                                }} className="px-4 py-2 border-2 border-yellow-500 bg-gray-800 text-yellow-200 rounded-lg font-semibold" value="">
+                                                    <option value="">+ Add Team Matchup</option>
+                                                    {currentDivision.teams
+                                                        .filter(team1 => isTeamAvailable(activeTab, round.id, team1.id))
+                                                        .map(team1 =>
+                                                            currentDivision.teams
+                                                                .filter(team2 => 
+                                                                    team2.id !== team1.id && 
+                                                                    isTeamAvailable(activeTab, round.id, team2.id) &&
+                                                                    !matchupExists(activeTab, round.id, team1.id, team2.id)
+                                                                )
+                                                                .map(team2 => (
+                                                                    <option key={`${team1.id}-${team2.id}`} value={`${team1.id}-${team2.id}`}>{team1.name} vs {team2.name}</option>
+                                                                ))
+                                                        )}
+                                                </select>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Team Filter Dropdown - for non-directors to filter by their team */}
