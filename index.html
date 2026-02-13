@@ -22,7 +22,7 @@
             userId: 'user-' + Math.random().toString(36).substr(2, 9)
         };
 
-        const CHANNEL = 'gcup-SCORING-FIX-2026';
+        const CHANNEL = 'gcup-tournament-2026-v2';
         const DIRECTOR_PASSWORD = 'director123';
 
         function TournamentApp() {
@@ -385,6 +385,45 @@
                 return !busyTeams.includes(teamId);
             };
 
+            const resetTournament = () => {
+                if (!confirm('⚠️ This will reset ALL points to 0 and delete ALL matches in BOTH divisions. This cannot be undone. Are you sure?')) {
+                    return;
+                }
+                
+                const newData = {
+                    championship: {
+                        teams: [
+                            { id: 1, name: 'Team Alpha', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                            { id: 2, name: 'Team Beta', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                            { id: 3, name: 'Team Gamma', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                            { id: 4, name: 'Team Delta', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] }
+                        ],
+                        rounds: [
+                            { id: 1, name: 'Round 1', pointValue: 1, matchups: [] },
+                            { id: 2, name: 'Round 2', pointValue: 1, matchups: [] },
+                            { id: 3, name: 'Round 3', pointValue: 2, matchups: [] },
+                            { id: 4, name: 'Round 4', pointValue: 2, matchups: [] }
+                        ]
+                    },
+                    classic: {
+                        teams: [
+                            { id: 1, name: 'Team Epsilon', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] },
+                            { id: 2, name: 'Team Zeta', points: 0, players: [{name: 'Player 1', checkedIn: false}, {name: 'Player 2', checkedIn: false}, {name: 'Player 3', checkedIn: false}, {name: 'Player 4', checkedIn: false}, {name: 'Player 5', checkedIn: false}, {name: 'Player 6', checkedIn: false}] }
+                        ],
+                        rounds: [
+                            { id: 1, name: 'Round 1', pointValue: 1, matchups: [] },
+                            { id: 2, name: 'Round 2', pointValue: 1, matchups: [] },
+                            { id: 3, name: 'Round 3', pointValue: 2, matchups: [] },
+                            { id: 4, name: 'Round 4', pointValue: 2, matchups: [] }
+                        ]
+                    }
+                };
+                
+                setTournamentData(newData);
+                publishData(newData);
+                alert('✅ Tournament reset complete!');
+            };
+
             if (loading) {
                 return (
                     <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 flex items-center justify-center">
@@ -415,6 +454,9 @@
                                         </button>
                                         <button onClick={() => setShowCheckIn(true)} className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg">
                                             ✓ Check-In
+                                        </button>
+                                        <button onClick={resetTournament} className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg">
+                                            🔄 Reset Tournament
                                         </button>
                                     </>
                                 )}
