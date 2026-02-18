@@ -799,7 +799,40 @@
                                                                             
                                                                             {(hasScore || pair.completed) && (
                                                                                 <div className="text-center mb-4 pb-4 border-b-2 border-gray-600">
-                                                                                    <p className="text-5xl font-bold text-yellow-400">{pair.team1Games} - {pair.team2Games}</p>
+                                                                                    <div className="flex items-center justify-center gap-4">
+                                                                                        {/* Determine winner */}
+                                                                                        {(() => {
+                                                                                            let team1Wins = false;
+                                                                                            let team2Wins = false;
+                                                                                            
+                                                                                            if (pair.completed) {
+                                                                                                if (pair.team1Games > pair.team2Games) {
+                                                                                                    team1Wins = true;
+                                                                                                } else if (pair.team2Games > pair.team1Games) {
+                                                                                                    team2Wins = true;
+                                                                                                } else if (pair.team1Games === pair.team2Games) {
+                                                                                                    const tb1 = pair.team1TiebreakScore || 0;
+                                                                                                    const tb2 = pair.team2TiebreakScore || 0;
+                                                                                                    if (tb1 > tb2) team1Wins = true;
+                                                                                                    else if (tb2 > tb1) team2Wins = true;
+                                                                                                }
+                                                                                            }
+                                                                                            
+                                                                                            return (
+                                                                                                <>
+                                                                                                    <div className={`text-5xl font-bold ${team1Wins ? 'text-yellow-400' : 'text-gray-400'}`}>
+                                                                                                        {team1Wins && <span className="text-3xl">🏆 </span>}
+                                                                                                        {pair.team1Games}
+                                                                                                    </div>
+                                                                                                    <span className="text-5xl font-bold text-yellow-400">-</span>
+                                                                                                    <div className={`text-5xl font-bold ${team2Wins ? 'text-yellow-400' : 'text-gray-400'}`}>
+                                                                                                        {pair.team2Games}
+                                                                                                        {team2Wins && <span className="text-3xl"> 🏆</span>}
+                                                                                                    </div>
+                                                                                                </>
+                                                                                            );
+                                                                                        })()}
+                                                                                    </div>
                                                                                     {(pair.team1TiebreakScore > 0 || pair.team2TiebreakScore > 0) && (
                                                                                         <p className="text-xl font-semibold text-red-400 mt-2">
                                                                                             TB: {pair.team1TiebreakScore || 0} - {pair.team2TiebreakScore || 0}
@@ -809,9 +842,32 @@
                                                                             )}
                                                                             
                                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                                {/* Team 1 */}
-                                                                                <div>
-                                                                                    <h5 className="font-bold text-lg text-yellow-400 mb-2">{getTeamName(activeTab, matchup.team1)}</h5>
+                                                                                {/* Calculate winner for display */}
+                                                                                {(() => {
+                                                                                    let team1Wins = false;
+                                                                                    let team2Wins = false;
+                                                                                    
+                                                                                    if (pair.completed) {
+                                                                                        if (pair.team1Games > pair.team2Games) {
+                                                                                            team1Wins = true;
+                                                                                        } else if (pair.team2Games > pair.team1Games) {
+                                                                                            team2Wins = true;
+                                                                                        } else if (pair.team1Games === pair.team2Games) {
+                                                                                            const tb1 = pair.team1TiebreakScore || 0;
+                                                                                            const tb2 = pair.team2TiebreakScore || 0;
+                                                                                            if (tb1 > tb2) team1Wins = true;
+                                                                                            else if (tb2 > tb1) team2Wins = true;
+                                                                                        }
+                                                                                    }
+                                                                                    
+                                                                                    return (
+                                                                                        <>
+                                                                                            {/* Team 1 */}
+                                                                                            <div>
+                                                                                                <h5 className="font-bold text-lg text-yellow-400 mb-2">
+                                                                                                    {getTeamName(activeTab, matchup.team1)}
+                                                                                                    {team1Wins && <span className="ml-2">🏆</span>}
+                                                                                                </h5>
                                                                                     {isDirector && !pair.completed ? (
                                                                                         <div className="space-y-2 mb-2">
                                                                                             <select 
@@ -857,7 +913,10 @@
                                                                                 
                                                                                 {/* Team 2 */}
                                                                                 <div>
-                                                                                    <h5 className="font-bold text-lg text-yellow-400 mb-2">{getTeamName(activeTab, matchup.team2)}</h5>
+                                                                                    <h5 className="font-bold text-lg text-yellow-400 mb-2">
+                                                                                        {getTeamName(activeTab, matchup.team2)}
+                                                                                        {team2Wins && <span className="ml-2">🏆</span>}
+                                                                                    </h5>
                                                                                     {isDirector && !pair.completed ? (
                                                                                         <div className="space-y-2 mb-2">
                                                                                             <select 
@@ -901,6 +960,9 @@
                                                                                         <p className="text-4xl font-bold text-yellow-400">{pair.team2Games}</p>
                                                                                     )}
                                                                                 </div>
+                                                                                        </>
+                                                                                    );
+                                                                                })()}
                                                                             </div>
                                                                             
                                                                             {/* Tiebreak */}
